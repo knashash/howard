@@ -12,32 +12,10 @@ class TutorController extends Controller
 {
 	public function index()
 	{
-		$test = array(1,2,3);
+		$tutor_data = DB::table('tutors')->select('first_name', 'last_name')->get();
+		$student_data = DB::table('students')->select('first_name', 'last_name')->get();
 
-		$data[] = array('name' => 'karim', 'age' => '23');
-		$data[] = array('name' => 'john', 'age' => '23');
-		$data[] = array('name' => 'chris', 'age' => '23');
-		$data[] = array('name' => 'yes', 'age' => '23');
-		$data[] = array('name' => 'him', 'age' => '23');
-		$data[] = array('name' => 'are', 'age' => '23');
-		$data[] = array('name' => 'you', 'age' => '23');
-		$data[] = array('name' => 'sure', 'age' => '23');
-		$data[] = array('name' => 'please', 'age' => '23');
-		$data[] = array('name' => 'let', 'age' => '23');
-
-		$data = Tutor::orderBy('last_name', 'desc')
-			->get();
-
-		$data = DB::table('tutors')->select('first_name', 'last_name')->get();
-
-		/*$projects = Project::where('is_completed', false)
-			->orderBy('created_at', 'desc')
-			->take(10)
-			->get();*/
-
-		//return response()->json($projects);
-
-		return view('admin', ['data' => $data]);
+		return view('admin', ['tutor_data' => $tutor_data, 'student_data' => $student_data] );
 	}
 
 	public function store(Request $request)
@@ -63,29 +41,6 @@ class TutorController extends Controller
 
 		$tutor->save();
 
-		/*
-		$project = App\Project::create([
-			'name' => $validatedData['name'],
-			'description' => $validatedData['description'],
-		]);*/
-
 		return response()->json('Project created!');
-	}
-
-	public function show($id)
-	{
-		$project = Project::with(['tasks' => function ($query) {
-			$query->where('is_completed', false);
-		}])->find($id);
-
-		return $project->toJson();
-	}
-
-	public function markAsCompleted(Project $project)
-	{
-		$project->is_completed = true;
-		$project->update();
-
-		return response()->json('Project updated!');
 	}
 }

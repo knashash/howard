@@ -26,3 +26,4 @@ Route::post('tasks', 'TaskController@store');
 Route::put('tasks/{task}', 'TaskController@markAsCompleted');
 
 Route::post('tutors', 'TutorController@store');
+Route::post('students', 'StudentController@store');

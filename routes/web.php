@@ -28,6 +28,10 @@ Route::middleware(['auth'])->group(function () {
 
 	Route::get('/data', 'TutorController@index');
 
+	Route::get('/new-student', function () {
+		return view('tutor-application');
+	});
+
 	Route::view('/{path?}', 'tasker');
 
 	Route::get('/home', 'HomeController@index')->name('home');

@@ -10,20 +10,18 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <script>
-		 var data = @json($data)
+                @if(!empty($tutor_data)) var tutor_data = @json($tutor_data); @endif
+                @if(!empty($student_data)) var student_data = @json($student_data); @endif
     </script>
-
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
-
-
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet" type="text/css">
 
-    <!-- Styles -->
+    <!-- Styles-->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
     <script src="https://use.fontawesome.com/477407ea55.js"></script>
@@ -85,5 +83,6 @@
             @yield('content')
         </main>
     </div>
+
 </body>
 </html>
