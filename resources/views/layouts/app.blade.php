@@ -12,6 +12,11 @@
     <script>
                 @if(!empty($tutor_data)) var tutor_data = @json($tutor_data); @endif
                 @if(!empty($student_data)) var student_data = @json($student_data); @endif
+                @if(!empty($match_data)) var match_data = @json($match_data); @endif
+
+        console.log(tutor_data);
+					 console.log(student_data);
+					 console.log(match_data);
     </script>
 
     <!-- Scripts -->

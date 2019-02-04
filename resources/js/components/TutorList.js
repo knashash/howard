@@ -2,26 +2,26 @@ import axios from 'axios'
 import React, { Component } from 'react';
 import ReactTable from "react-table";
 import "react-table/react-table.css";
-import Modal from '../components/Modal/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { TabContent, TabPane, Nav, NavItem, NavLink, Card, Button, CardTitle, CardText, Row, Col } from 'reactstrap';
 import classnames from 'classnames';
-import ModalExample from './ModalExample';
+import ModalProfile from './ModalProfile';
 import TutorProfile from "./TutorProfile";
+import MatchMaker from "./MatchMaker";
 
 class TutorList extends Component {
 
 	constructor(props, context) {
 		super(props, context);
 		this.state = {show: false};
-		this.showModal = this.showModal.bind(this);
 
 		this.toggle = this.toggle.bind(this);
+		this.newMatch = this.newMatch.bind(this);
 		this.state = {
 			activeTab: '1',
-			greeting_var: 'jumani'
+			profile_data: [],
+			modal_comp: 'profile'
 		};
-
 	}
 
 	toggle(tab) {
@@ -32,19 +32,27 @@ class TutorList extends Component {
 		}
 	}
 
-
-	handleEdit(row) {
-		console.log(row);
+	newMatch() {
 		this.setState({
-			greeting_var : row.first_name
+			modal_comp : 'match'
 		})
+
 		this._modal.toggle();
+		this._modal.setState({modal_size:'lg'});
 	}
 
-	showModal() {
-		this.setState(state => ({
-			show: !state.show
-		}));
+
+	handleEdit(row) {
+		this.setState({
+			modal_comp : 'profile'
+		})
+
+		this.setState({
+			profile_data : row
+		})
+
+		this._modal.toggle();
+		this._modal.setState({modal_size:'sm'});
 	}
 
 	render() {
@@ -52,6 +60,13 @@ class TutorList extends Component {
 		const iconStyle = {
 			marginRight: '10px'
 		}
+
+		const columns2 = Object.keys({tutor_data}).map((key, id)=>{
+			return {
+				Header: id,
+				accessor: id
+			}
+		})
 
 		const columns = [{
 			Header: 'First Name',
@@ -72,7 +87,7 @@ class TutorList extends Component {
 
 		return (
 
-									<div>
+			<div>
 										<ReactTable
 											noDataText="Oh Noes! No Data"
 											data={tutor_data}
@@ -83,10 +98,23 @@ class TutorList extends Component {
 
 										<div>
 
-											<ModalExample ref={(modal) => { this._modal = modal; }}>
-												<TutorProfile greeting={this.state.greeting_var}/>
-											</ModalExample>
+											<ModalProfile
+												ref={(modal) => { this._modal = modal; }}
+												modal_title = {this.state.profile_data.first_name + " " + this.state.profile_data.last_name}
+											>
+												{(() => {
+													switch (this.state.modal_comp) {
+														case "match": return <MatchMaker></MatchMaker>
+														default:      return <TutorProfile selectedProfile={this.state.profile_data}/>
+													}
+												})()}
+											</ModalProfile>
 
+										</div>
+
+
+										<div>
+											<Button color="primary" onClick={this.newMatch}>primary</Button>{' '}
 										</div>
 									</div>
 

@@ -13,6 +13,6 @@ class Tutor extends Model
 	 */
 	public function students()
 	{
-		return $this->belongsToMany('App\Student');
+		return $this->belongsToMany('App\Student', 'tutor_student_assocs','tutor_id');
 	}
 }

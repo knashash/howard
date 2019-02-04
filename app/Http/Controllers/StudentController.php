@@ -42,4 +42,11 @@ class StudentController extends Controller
 
 		return response()->json('Student saved!');
 	}
+
+	public function student_list()
+	{
+		$student_data = DB::table('students')->get();
+
+		return response()->json($student_data);
+	}
 }

@@ -3,9 +3,8 @@
 import axios from 'axios'
 import React, { Component } from 'react'
 import { Card, CardImg, CardText, CardBody, CardTitle, CardHeader, CardFooter, CardSubtitle, Button,Row, Col, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
-import SelectProfile from './SelectProfile';
 
-class TutorProfile extends Component {
+class StudentProfile extends Component {
 
 	constructor () {
 		super()
@@ -14,8 +13,8 @@ class TutorProfile extends Component {
 			dropdownOpen: false,
 			profiles: [],
 			selectedProfile: [],
-			profile_type: 'tutors',
-			dropDownTitle: 'Select Tutor'
+			profile_type: 'students',
+			dropDownTitle: 'Select Student'
 		}
 
 		this.toggle = this.toggle.bind(this);
@@ -36,8 +35,8 @@ class TutorProfile extends Component {
 
 	changeProfile(e) {
 		this.setState({selectedProfile: e}, function () {
+			console.log(this.state.selectedProfile);
 		});
-
 		this.setState({
 			dropDownTitle: e.first_name + ' ' + e.last_name
 		})
@@ -105,4 +104,4 @@ class TutorProfile extends Component {
 	}
 }
 
-export default TutorProfile;
+export default StudentProfile;

@@ -26,4 +26,9 @@ Route::post('tasks', 'TaskController@store');
 Route::put('tasks/{task}', 'TaskController@markAsCompleted');
 
 Route::post('tutors', 'TutorController@store');
+Route::get('tutors', 'TutorController@tutor_list');
 Route::post('students', 'StudentController@store');
+Route::get('students', 'StudentController@student_list');
+
+Route::post('matches', 'MatchController@store');
+Route::get('matches', 'MatchController@match_list');

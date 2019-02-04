@@ -2,6 +2,8 @@
 namespace App\Http\Controllers;
 
 use App\Tutor;
+use App\Match;
+use App\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -12,35 +14,20 @@ class TutorController extends Controller
 {
 	public function index()
 	{
-		$tutor_data = DB::table('tutors')->select('first_name', 'last_name')->get();
-		$student_data = DB::table('students')->select('first_name', 'last_name')->get();
+		$tutor_data = Tutor::with(['students'])->get();
+		$student_data = Student::with(['tutors'])->get();
+		$match_data = Match::with(['tutor', 'student'])->get();
 
-		return view('admin', ['tutor_data' => $tutor_data, 'student_data' => $student_data] );
+		//print_r($match_data);
+		//die();
+
+		return view('admin', ['tutor_data' => $tutor_data, 'student_data' => $student_data, 'match_data' => $match_data] );
 	}
 
-	public function store(Request $request)
+	public function tutor_list()
 	{
-		$validatedData = $request->validate([
-			'first_name' => 'required',
-			'last_name' => 'required',
-			'email' => 'required',
-			'address' => 'required',
-			'city' => 'required',
-			'state' => 'required',
-			'zip' => 'required'
-		]);
+		$tutor_data = DB::table('tutors')->get();
 
-		$tutor = new Tutor;
-		$tutor->first_name = $validatedData['first_name'];
-		$tutor->last_name = $validatedData['last_name'];
-		$tutor->email = $validatedData['email'];
-		$tutor->address = $validatedData['address'];
-		$tutor->city = $validatedData['city'];
-		$tutor->state = $validatedData['state'];
-		$tutor->zip = $validatedData['zip'];
-
-		$tutor->save();
-
-		return response()->json('Project created!');
+		return response()->json($tutor_data);
 	}
 }
