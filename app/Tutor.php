@@ -3,10 +3,13 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Tutor extends Model
 {
-	protected $fillable = ['first_name', 'last_name', 'email', 'address', 'city', 'state', 'zip'];
+	protected $guarded = ['id'];
+
+	protected $appends = ['image_url','test_attr'];
 
 	/**
 	 * The students that belong to the tutor.
@@ -14,5 +17,15 @@ class Tutor extends Model
 	public function students()
 	{
 		return $this->belongsToMany('App\Student', 'tutor_student_assocs','tutor_id');
+	}
+
+	public function getImageUrlAttribute()
+	{
+		return asset( Storage::url('test.jpeg'));
+	}
+
+	public function getTestAttrAttribute()
+	{
+		return 'testing';
 	}
 }

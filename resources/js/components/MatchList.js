@@ -9,6 +9,7 @@ import classnames from 'classnames';
 import ModalProfile from "./ModalProfile";
 import MatchMaker from "./MatchMaker";
 import TutorProfile from "./TutorProfile";
+import NewTutor from "./NewTutor";
 
 class MatchList extends Component {
 
@@ -16,19 +17,27 @@ class MatchList extends Component {
 		super(props);
 		this.state = {
 			show: false,
-			data: match_data
+			data: match_data,
+			match_data: [],
 		};
 		this.showModal = this.showModal.bind(this);
 		this.newMatch = this.newMatch.bind(this);
-		this.setMatchListDatas = this.setMatchListDatas.bind(this);
+		this.setMatchListData = this.setMatchListData.bind(this);
 
 	}
 
-	handleEdit() {
-		console.log("The link was clicked");
+	handleEdit(row) {
+		this.setState({
+			modal_comp : 'match',
+			modal_title: 'Edit Match Data',
+			match_data : row
+		})
+
+		this._modal.toggle();
+		this._modal.setState({modal_size:'lg'});
 	}
 
-	setMatchListDatas() {
+	setMatchListData() {
 
 		console.log('im here johnny!')
 		var self = this
@@ -95,7 +104,8 @@ class MatchList extends Component {
 						{(() => {
 							switch (this.state.modal_comp) {
 								case "match": return <MatchMaker
-									setMatchListDatas={this.setMatchListDatas}
+									setMatchListData={this.setMatchListData}
+									selectedMatch={this.state.match_data}
 								></MatchMaker>
 								default:      return <TutorProfile selectedProfile={this.state.profile_data}/>
 							}

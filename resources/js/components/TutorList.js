@@ -3,25 +3,43 @@ import React, { Component } from 'react';
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { TabContent, TabPane, Nav, NavItem, NavLink, Card, Button, CardTitle, CardText, Row, Col } from 'reactstrap';
+import { TabContent, TabPane, Nav, NavItem, NavLink, Card, Button, CardTitle, CardText, Row, Col} from 'reactstrap';
 import classnames from 'classnames';
 import ModalProfile from './ModalProfile';
 import TutorProfile from "./TutorProfile";
-import MatchMaker from "./MatchMaker";
+import NewTutor from "./NewTutor";
 
 class TutorList extends Component {
 
 	constructor(props, context) {
 		super(props, context);
-		this.state = {show: false};
 
 		this.toggle = this.toggle.bind(this);
-		this.newMatch = this.newMatch.bind(this);
+		this.newTutor = this.newTutor.bind(this);
 		this.state = {
 			activeTab: '1',
 			profile_data: [],
-			modal_comp: 'profile'
+			data: tutor_data,
+			modal_comp: 'profile',
+			modal_title: 'Add New Tutor',
+			show: false,
 		};
+		this.setTutorListData = this.setTutorListData.bind(this);
+	}
+
+	setTutorListData() {
+
+		var self = this
+		axios.get('/api/tutors').then(function (response) {
+			self.setState({
+				data: response.data
+			})
+		})
+			.catch(function (error) {
+				console.log(error);
+			});
+
+		this._modal.toggle();
 	}
 
 	toggle(tab) {
@@ -32,27 +50,27 @@ class TutorList extends Component {
 		}
 	}
 
-	newMatch() {
+	newTutor() {
 		this.setState({
-			modal_comp : 'match'
+			modal_comp : 'tutor',
+			profile_data : undefined
 		})
 
 		this._modal.toggle();
 		this._modal.setState({modal_size:'lg'});
+
 	}
 
 
 	handleEdit(row) {
 		this.setState({
-			modal_comp : 'profile'
-		})
-
-		this.setState({
+			modal_comp : 'tutor',
+			modal_title: 'Edit Tutor Data',
 			profile_data : row
 		})
 
 		this._modal.toggle();
-		this._modal.setState({modal_size:'sm'});
+		this._modal.setState({modal_size:'lg'});
 	}
 
 	render() {
@@ -86,43 +104,42 @@ class TutorList extends Component {
 			}]
 
 		return (
-
 			<div>
-										<ReactTable
-											noDataText="Oh Noes! No Data"
-											data={tutor_data}
-											columns={columns}
-											defaultPageSize = {3}
-											pageSizeOptions = {[3, 6]}
-										/>
+				<Row>
+					<Col sm="8" md={{ size: 2, offset: 10 }}><Button color="primary" onClick={this.newTutor}>New Tutor</Button>{' '}</Col>
+				</Row>
 
-										<div>
+				<Row>
+					<Col>
+						<ReactTable
+							noDataText="Oh Noes! No Data"
+							data={this.state.data}
+							columns={columns}
+							defaultPageSize = {15}
+							pageSizeOptions = {[3, 6]}
+						/>
+					</Col>
+				</Row>
 
-											<ModalProfile
-												ref={(modal) => { this._modal = modal; }}
-												modal_title = {this.state.profile_data.first_name + " " + this.state.profile_data.last_name}
-											>
-												{(() => {
-													switch (this.state.modal_comp) {
-														case "match": return <MatchMaker></MatchMaker>
-														default:      return <TutorProfile selectedProfile={this.state.profile_data}/>
-													}
-												})()}
-											</ModalProfile>
+				<div>
 
-										</div>
+					<ModalProfile
+						ref={(modal) => { this._modal = modal; }}
+						modal_title = {this.state.modal_title}
+					>
+						{(() => {
+							switch (this.state.modal_comp) {
+								case "tutor": return <NewTutor
+									setTutorListData={this.setTutorListData}
+									selectedProfile={this.state.profile_data}
+								></NewTutor>
+								default:      return <TutorProfile selectedProfile={this.state.profile_data}/>
+							}
+						})()}
+					</ModalProfile>
 
-
-										<div>
-											<Button color="primary" onClick={this.newMatch}>primary</Button>{' '}
-										</div>
-									</div>
-
-
-
-
-
-
+				</div>
+			</div>
 		);
 	}
 }

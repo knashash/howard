@@ -3,11 +3,13 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\Model;
 
 class Match extends Pivot
 {
 	protected $table = 'tutor_student_assocs';
 	protected $appends = ['student_name', 'tutor_name'];
+	public $incrementing = true;
 
 	/**
 	 * The tutors that belong to the students
@@ -23,6 +25,22 @@ class Match extends Pivot
 	public function student()
 	{
 		return $this->belongsTo('App\Student') ;
+	}
+
+	/**
+	 * The matches the details belong to
+	 */
+	public function match_meeting_details()
+	{
+		return $this->hasMany('App\MatchMeetingDetail', 'match_id');
+	}
+
+	/**
+	 * Get the sessions for the match
+	 */
+	public function sessions()
+	{
+		return $this->belongsToMany('App\Session', 'session_match_assocs','tutor_student_assoc_id');
 	}
 
 	public function getStudentNameAttribute()

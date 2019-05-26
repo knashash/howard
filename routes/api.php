@@ -26,9 +26,18 @@ Route::post('tasks', 'TaskController@store');
 Route::put('tasks/{task}', 'TaskController@markAsCompleted');
 
 Route::post('tutors', 'TutorController@store');
+Route::put('tutors/{id}', 'TutorController@update');
 Route::get('tutors', 'TutorController@tutor_list');
+
 Route::post('students', 'StudentController@store');
+Route::put('students/{id}', 'StudentController@update');
 Route::get('students', 'StudentController@student_list');
 
 Route::post('matches', 'MatchController@store');
 Route::get('matches', 'MatchController@match_list');
+
+Route::post('sessions', 'SessionController@store');
+Route::put('sessions/{id}', 'SessionController@update');
+Route::get('sessions', 'SessionController@index');
+
+Route::get('session_categories', 'SessionCategoryController@session_category_list');

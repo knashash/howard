@@ -28,6 +28,6 @@ class TaskController extends Controller
 		$task->is_completed = true;
 		$task->update();
 
-		return response()->json('Task updated!');
+		return response()->json('Task updatedhhhh!');
 	}
 }

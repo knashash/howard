@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Student extends Model
 {
+	protected $guarded = ['id'];
+
 	/**
 	 * The students that belong to the tutor.
 	 */

@@ -35,6 +35,9 @@ class TutorProfile extends Component {
 	}
 
 	changeProfile(e) {
+
+		console.log(e)
+
 		this.setState({selectedProfile: e}, function () {
 		});
 

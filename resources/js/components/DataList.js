@@ -6,6 +6,7 @@ import classnames from 'classnames';
 import TutorList from './TutorList';
 import StudentList from './StudentList';
 import MatchList from './MatchList';
+import SessionList from './SessionList';
 import SelectProfile from './SelectProfile';
 
 
@@ -72,6 +73,14 @@ class DataList extends Component {
 								Matches
 							</NavLink>
 						</NavItem>
+						<NavItem>
+							<NavLink
+								className={classnames({ active: this.state.activeTab === '4' })}
+								onClick={() => { this.toggle('4'); }}
+							>
+								Sessions
+							</NavLink>
+						</NavItem>
 					</Nav>
 					<TabContent activeTab={this.state.activeTab}>
 						<TabPane tabId="1">
@@ -92,6 +101,13 @@ class DataList extends Component {
 							<Row>
 								<Col sm="12">
 									<MatchList />
+								</Col>
+							</Row>
+						</TabPane>
+						<TabPane tabId="4">
+							<Row>
+								<Col sm="12">
+									<SessionList />
 								</Col>
 							</Row>
 						</TabPane>

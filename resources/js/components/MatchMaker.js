@@ -1,7 +1,7 @@
 import axios from 'axios'
 import React, { Component } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container, Row, Col, Button } from 'reactstrap';
+import {Form, FormGroup, Label, Input, FormText, Container, Row, Col, Button, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import TutorProfile from "./TutorProfile";
 import StudentProfile from "./StudentProfile";
 import confirm from 'reactstrap-confirm';
@@ -18,14 +18,39 @@ class MatchMaker extends Component {
 			tutor_id: 0,
 			student_id: 0,
 			student_profile_data: [],
+			selectedMatch: [],
 			modal_comp: 'profile',
-			test_prop: 'karim'
+			test_prop: 'karim',
+			submit_text: 'Create Match',
 		};
 
 		this.setTutorProfile = this.setTutorProfile.bind(this)
 		this.setStudentProfile = this.setStudentProfile.bind(this)
 		this.handleCreateNewMatch = this.handleCreateNewMatch.bind(this)
+		this.populateMatchData = this.populateMatchData.bind(this)
 		this.testFunc = this.testFunc.bind(this)
+	}
+
+	componentWillMount () {
+		if (this.props.selectedMatch !== undefined) {
+			this.populateMatchData(this.props.selectedMatch)
+
+		}
+	}
+
+	populateMatchData(e) {
+
+		this.setState({selectedMatch: e}, function () {
+		});
+
+		let submitTextState;
+		submitTextState = e.id ? "Update Match" : "Add Match";
+		this.setState({
+			tutor_profile_data: e.tutor,
+			student_profile_data: e.student,
+			submit_text: submitTextState
+		})
+
 	}
 
 	async handleCreateNewMatch (event) {
@@ -48,7 +73,7 @@ class MatchMaker extends Component {
 						// redirect to the homepage
 						//history.push('/')
 						console.log('calling the test func');
-						self.props.setMatchListDatas();
+						self.props.setMatchListData();
 					})
 					.catch(function (response) {
 
@@ -67,19 +92,13 @@ class MatchMaker extends Component {
 	}
 
 	setTutorProfile(e) {
-
 		this.setState({tutor_profile_data: e}, function () {
 		});
-
-		console.log('ok')
 	}
 
 	setStudentProfile(e) {
-
 		this.setState({student_profile_data: e}, function () {
 		});
-
-		console.log('ok')
 	}
 
 	render() {
@@ -90,16 +109,17 @@ class MatchMaker extends Component {
 
 		return (
 			<Container>
+				<Form>
 				<Row>
 					<Col sm="6">
 						<TutorProfile
-							profile={this.state.tutor_profile_data}
+							selectedProfile={this.state.tutor_profile_data}
 							setProfile={this.setTutorProfile}
 						/>
 					</Col>
 					<Col sm="6">
 						<StudentProfile
-							profile={this.state.student_profile_data}
+							selectedProfile={this.state.student_profile_data}
 							setProfile={this.setStudentProfile}
 						/>
 					</Col>
@@ -107,9 +127,10 @@ class MatchMaker extends Component {
 
 				<Row>
 					<Col sm="12" md={{ size: 6, offset: 5 }} style={buttonRow}>
-						<Button color="primary" onClick={this.handleCreateNewMatch}>Do Something</Button>{' '}
+						<Button color="primary" onClick={this.handleCreateNewMatch}>{this.state.submit_text}</Button>{' '}
 					</Col>
 				</Row>
+				</Form>
 			</Container>
 		);
 	}

@@ -6,7 +6,7 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom'
 import Header from './Header'
 import NewProject from './NewProject'
 import ProjectsList from './ProjectsList'
-import SingleProject from './SingleProject'
+import SingleProject from './SinglqeProject'
 class App extends Component {
 	render () {
 		return (
