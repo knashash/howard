@@ -7,8 +7,9 @@ import TutorList from './TutorList';
 import StudentList from './StudentList';
 import MatchList from './MatchList';
 import SessionList from './SessionList';
-import SelectProfile from './SelectProfile';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import axios from "axios";
 
 class DataList extends Component {
 
@@ -16,10 +17,13 @@ class DataList extends Component {
 		super(props);
 		this.state = {show: false};
 		this.showModal = this.showModal.bind(this);
+		this.match_tab = React.createRef();
+		this.tutor_tab = React.createRef();
 
 		this.toggle = this.toggle.bind(this);
 		this.state = {
-			activeTab: '1'
+			activeTab: '1',
+			match_tab_data: []
 		};
 	}
 
@@ -29,6 +33,8 @@ class DataList extends Component {
 				activeTab: tab
 			});
 		}
+		if (tab == 3) this.match_tab.current.reloadMatchData()
+		if (tab == 1) this.tutor_tab.current.updateTutorData()
 	}
 
 	handleEdit(row) {
@@ -43,10 +49,13 @@ class DataList extends Component {
 
 	render() {
 
-		const greeting = 'hello';
+		const toastBar = {
+			width: '75%'
+		};
 
 		return (
 			<div>
+				<ToastContainer position={toast.POSITION.TOP_LEFT} style={toastBar}/>
 				<div>
 					<Nav tabs>
 						<NavItem>
@@ -76,7 +85,7 @@ class DataList extends Component {
 						<NavItem>
 							<NavLink
 								className={classnames({ active: this.state.activeTab === '4' })}
-								onClick={() => { this.toggle('4'); }}
+								onClick={() => { this.toggle('4'), console.log('test'); }}
 							>
 								Sessions
 							</NavLink>
@@ -86,7 +95,7 @@ class DataList extends Component {
 						<TabPane tabId="1">
 							<Row>
 								<Col sm="12">
-									<TutorList />
+									<TutorList ref={this.tutor_tab}/>
 								</Col>
 							</Row>
 						</TabPane>
@@ -100,7 +109,7 @@ class DataList extends Component {
 						<TabPane tabId="3">
 							<Row>
 								<Col sm="12">
-									<MatchList />
+									<MatchList ref={this.match_tab}/>
 								</Col>
 							</Row>
 						</TabPane>
@@ -113,14 +122,6 @@ class DataList extends Component {
 						</TabPane>
 					</TabContent>
 				</div>
-
-
-				<div>
-
-					<SelectProfile/>
-
-				</div>
-
 
 			</div>
 		);

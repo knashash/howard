@@ -1,10 +1,9 @@
 import axios from 'axios'
 import React, { Component } from 'react'
-import {Form, FormGroup, Label, Input, FormText, Container, Row, Col, Button, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import {Form, FormGroup, Label, Input, FormText, Container, Row, Col, Button, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Media } from 'reactstrap';
 import confirm from 'reactstrap-confirm';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import moment from 'moment';
 
 
 class StudentAddUpdate extends Component {
@@ -29,9 +28,12 @@ class StudentAddUpdate extends Component {
 			notes: '',
 			errors: [],
 			selectedProfile: [],
-			submit_text: 'Add Student'
+			submit_text: 'Add Student',
+			profile_image: false,
+			image_url: profile_image_placeholder
 		}
 		this.handleFieldChange = this.handleFieldChange.bind(this)
+		this.handleFileChange = this.handleFileChange.bind(this)
 		this.handleCreateNewStudent = this.handleCreateNewStudent.bind(this)
 		this.hasErrorFor = this.hasErrorFor.bind(this)
 		this.renderErrorFor = this.renderErrorFor.bind(this)
@@ -48,6 +50,18 @@ class StudentAddUpdate extends Component {
 		}, function () {
 			console.log(this.state.last_name);
 		})
+	}
+
+	handleFileChange (e) {
+		let files = e.target.files;
+		let reader = new FileReader();
+		reader.readAsDataURL(files[0]);
+		reader.onload=(e)=>{
+			this.setState({
+				profile_image: e.target.result,
+				image_url: e.target.result
+			});
+		}
 	}
 
 	setDOB (date) {
@@ -91,6 +105,7 @@ class StudentAddUpdate extends Component {
 			date_exit: this.state.date_exit,
 			active: this.state.active,
 			notes: this.state.notes,
+			profile_image: this.state.profile_image
 		}
 
 		if (student.id)
@@ -188,7 +203,8 @@ class StudentAddUpdate extends Component {
 			date_exit: e.date_exit,
 			active: e.active,
 			notes: e.notes,
-			submit_text: submitTextState
+			submit_text: submitTextState,
+			image_url: e.image_url
 		})
 
 	}
@@ -213,10 +229,38 @@ class StudentAddUpdate extends Component {
 			marginTop: '10px'
 		};
 
+		const profileImgStyle = {
+			maxHeight: '128px',
+			maxWidth: '128px'
+		};
+
 		return (
 
 			<Container>
 				<Form>
+					<Row>
+						<Col sm="12">
+
+							<Media>
+								<Media left href="#">
+									<Media object style={profileImgStyle} src={this.state.image_url} alt="Generic placeholder image" />
+								</Media>
+								<Media body>
+									<FormGroup>
+										<Input size="sm" type="file" name="profile_image" id="profile_image" label="Yo, pick a file!" onChange={this.handleFileChange} />
+										<FormText color="muted">
+											Upload an image to update the profile picture
+										</FormText>
+									</FormGroup>
+								</Media>
+							</Media>
+						</Col>
+					</Row>
+					<Row>
+						<Col sm="12">
+							<hr/>
+						</Col>
+					</Row>
 					<Row>
 						<Col sm="3">
 							<FormGroup>

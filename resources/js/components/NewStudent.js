@@ -32,6 +32,7 @@ class NewStudent extends Component {
 			submit_text: 'Add Student'
 		}
 		this.handleFieldChange = this.handleFieldChange.bind(this)
+		this.handleFileChange = this.handleFileChange.bind(this)
 		this.handleCreateNewStudent = this.handleCreateNewStudent.bind(this)
 		this.hasErrorFor = this.hasErrorFor.bind(this)
 		this.renderErrorFor = this.renderErrorFor.bind(this)
@@ -49,6 +50,17 @@ class NewStudent extends Component {
 		}, function () {
 			console.log(this.state.last_name);
 		})
+	}
+
+	handleFileChange (e) {
+		let files = e.target.files;
+		let reader = new FileReader();
+		reader.readAsDataURL(files[0]);
+		reader.onload=(e)=>{
+			this.setState({
+				profile_image: e.target.result
+			});
+		}
 	}
 
 
@@ -73,6 +85,7 @@ class NewStudent extends Component {
 		event.preventDefault()
 
 		const { history } = this.props
+		const notify_obj = [];
 
 		const student = this.state.selectedProfile
 
@@ -107,12 +120,15 @@ class NewStudent extends Component {
 					var self = this
 					axios.put(`/api/students/${student.id}`, student_updated)
 						.then(function (response) {
-							// redirect to the homepage
-							//history.push('/')
-							console.log('calling the test func');
+							notify_obj.type = 'success';
+							notify_obj.text = response.data;
+							self.props.notify(notify_obj);
 							self.props.setStudentListData();
 						})
 						.catch(function (error) {
+							notify_obj.text = 'Error Updating Student! '+error.response.data.message;
+							notify_obj.type = 'error';
+							self.props.notify(notify_obj);
 							self.setState({
 								errors: error.response.data.errors
 							})
@@ -135,12 +151,15 @@ class NewStudent extends Component {
 					var self = this
 					axios.post('/api/students', student_updated)
 						.then(function (response) {
-							// redirect to the homepage
-							//history.push('/')
+							notify_obj.type = 'success';
+							notify_obj.text = response.data;
+							self.props.notify(notify_obj);
 							console.log('calling the test func');
 							self.props.setStudentListData();
 						})
 						.catch(function (error) {
+							notify_obj.text = 'Error Creating Tutor! '+error.response.data.message;
+							notify_obj.type = 'error';
 							self.setState({
 								errors: error.response.data.errors
 							})
@@ -184,7 +203,8 @@ class NewStudent extends Component {
 			date_exit: e.date_exit,
 			active: e.active,
 			notes: e.notes,
-			submit_text: 'Update Student'
+			submit_text: 'Update Student',
+			image_url: e.image_url
 		})
 
 	}
@@ -213,6 +233,29 @@ class NewStudent extends Component {
 
 			<Container>
 				<Form>
+					<Row>
+						<Col sm="12">
+
+							<Media>
+								<Media left href="#">
+									<Media object style={profileImgStyle} src={this.state.image_url} alt="Generic placeholder image" />
+								</Media>
+								<Media body>
+									<FormGroup>
+										<Input size="sm" type="file" name="profile_image" id="profile_image" label="Yo, pick a file!" onChange={this.handleFileChange} />
+										<FormText color="muted">
+											Upload an image to update the profile picture
+										</FormText>
+									</FormGroup>
+								</Media>
+							</Media>
+						</Col>
+					</Row>
+					<Row>
+						<Col sm="12">
+							<hr/>
+						</Col>
+					</Row>
 					<Row>
 						<Col sm="3">
 							<FormGroup>

@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 import React, { Component } from 'react'
-import { Card, CardImg, CardText, CardBody, CardTitle, CardHeader, CardFooter, CardSubtitle, Button,Row, Col, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import { Card, CardImg, CardText, CardBody, CardTitle, CardHeader, CardFooter, CardSubtitle, Button,Row, Col, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Media } from 'reactstrap';
 
 class StudentProfile extends Component {
 
@@ -12,9 +12,10 @@ class StudentProfile extends Component {
 			profile: [],
 			dropdownOpen: false,
 			profiles: [],
-			selectedProfile: [],
+			selectedProfile: undefined,
 			profile_type: 'students',
-			dropDownTitle: 'Select Student'
+			dropDownTitle: 'Select Student',
+			profile_image: profile_image_placeholder
 		}
 
 		this.toggle = this.toggle.bind(this);
@@ -28,7 +29,7 @@ class StudentProfile extends Component {
 			})
 		})
 
-		if (this.props.selectedProfile) {
+		if (this.props.selectedProfile !== undefined) {
 			this.changeProfile(this.props.selectedProfile)
 		}
 	}
@@ -60,16 +61,44 @@ class StudentProfile extends Component {
 	render() {
 		const greeting = 'Welcome to React';
 		let profile = {...this.state.selectedProfile};
+		let profile_address = ''
+
+		if (this.state.selectedProfile == undefined)
+		{
+			profile.email =''
+			profile.state = ''
+			profile.city = ''
+			profile.address = ''
+			profile.image_url = this.state.profile_image
+		}
+		else
+		{
+			profile_address = profile.address+" "+profile.city+", "+profile.state
+		}
+
+		const profileImgStyle = {
+			maxHeight: '200px',
+			maxWidth: '200px'
+		};
 
 		return (
 
 
 				<Card>
 					<CardHeader>
-
+						Student Profile
 					</CardHeader>
 
-					<CardImg top width="100%" src="https://placeholdit.imgix.net/~text?txtsize=33&txt=256%C3%97180&w=256&h=180" alt="Card image cap" />
+					<Row>
+						<Col sm="12" style={{height:200}}>
+
+							<Media>
+
+								<Media object style={profileImgStyle} src={profile.image_url} alt="Generic placeholder image" />
+
+							</Media>
+						</Col>
+					</Row>
 
 					<CardBody>
 						<CardTitle>
@@ -79,12 +108,29 @@ class StudentProfile extends Component {
 										<DropdownToggle caret>
 											{this.state.dropDownTitle}
 										</DropdownToggle>
-										<DropdownMenu>
+										<DropdownMenu
+											modifiers={{
+												setMaxHeight: {
+													enabled: true,
+													order: 890,
+													fn: (data) => {
+														return {
+															...data,
+															styles: {
+																...data.styles,
+																overflow: 'auto',
+																maxHeight: 200,
+															},
+														};
+													},
+												},
+											}}
+										>
 											{this.state.profiles.map(function(e, i){
 												return <DropdownItem
 													key={i}
 												>
-													<div onClick={() => { this.changeProfile(e) }}>{[ e.first_name + ' ' + e.last_name]}</div>
+													<div onClick={() => { this.changeProfile(e) }}>{[ e.last_name + ', ' +e.first_name]}</div>
 												</DropdownItem>;
 											}, this)}
 										</DropdownMenu>
@@ -92,9 +138,12 @@ class StudentProfile extends Component {
 								</Col>
 							</Row>
 						</CardTitle>
-						<CardSubtitle>{profile.city}</CardSubtitle>
-						<CardText>Some quick example text to build on the card title and make up the bulk of the card's content.</CardText>
-						<Button>Button</Button>
+
+						{/*
+						<CardText>{profile.email}</CardText>
+						<CardText>{profile_address}</CardText>
+						*/}
+
 					</CardBody>
 				</Card>
 

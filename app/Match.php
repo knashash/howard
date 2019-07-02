@@ -4,9 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\Model;
+use Log;
 
-class Match extends Pivot
+class Match extends Model
 {
+	protected $guarded = ['id'];
 	protected $table = 'tutor_student_assocs';
 	protected $appends = ['student_name', 'tutor_name'];
 	public $incrementing = true;
@@ -40,7 +42,7 @@ class Match extends Pivot
 	 */
 	public function sessions()
 	{
-		return $this->belongsToMany('App\Session', 'session_match_assocs','tutor_student_assoc_id');
+		return $this->belongsToMany('App\Session', 'session_match_assocs','tutor_student_assoc_id', 'session_id')->orderBy('session_date', 'Desc');
 	}
 
 	public function getStudentNameAttribute()

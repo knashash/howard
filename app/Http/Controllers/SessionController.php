@@ -5,44 +5,54 @@ use App\Session;
 use App\Match;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
-use function MongoDB\BSON\toJSON;
 
 
 class SessionController extends Controller
 {
 	public function index()
 	{
-		$session_data = Session::with(['matches'])->get();
+		$session_data = Session::with(['matches'])->orderBy('session_date', 'Desc')->get();
 
 		return response()->json($session_data);
 	}
 
 	public function store(Request $request)
 	{
-		$validatedData = $request->validate([
-			'category_id' => 'required|integer',
-			'student_list' => 'required|array',
-			'tutor_list' => 'required|array',
-			'session_date' => 'required',
-			'session_mins' => 'required|numeric|max:100',
-			'session_hours' => 'required|numeric|max:12',
-			'notes' => 'nullable|string',
-			'in_class' => 'required:numeric:max:1',
-		]);
+		try {
+			$validatedData = $request->validate([
+				'category_id' => 'required|integer',
+				'student_list' => 'required|array',
+				'tutor_list' => 'required|array',
+				'session_date' => 'required',
+				'session_mins' => 'required|numeric|max:100',
+				'session_hours' => 'required|numeric|max:12',
+				'notes' => 'nullable|string',
+				'in_class' => 'required:numeric:max:1',
+			]);
+		}
+		 catch (ValidationException $exception) {
+		return response()->json([
+			'status' => 'error',
+			'msg'    => 'Error',
+			'errors' => $exception->errors(),
+		], 422);
+	}
 
 		DB::transaction(function () use ($validatedData) {
 
 			$session_matches = [];
 			$session_minutes = ($validatedData['session_hours']*60) + $validatedData['session_mins'];
-			$session_date = strtotime($validatedData['session_date']);
 			date_default_timezone_set('America/Chicago');
+			$session_date = strtotime($validatedData['session_date']);
 			$session_date = date('Y-m-d', $session_date);
 
 			if (!$session_minutes) abort(400, 'Session must have time');
 
-			foreach ($validatedData['tutor_list'] as $tutor_id) {
-				foreach ($validatedData['student_list'] as $student_id) {
+			$tutor_list = array_unique($validatedData['tutor_list']);
+			$student_list = array_unique($validatedData['student_list']);
+
+			foreach ($tutor_list as $tutor_id) {
+				foreach ($student_list as $student_id) {
 					$match = DB::table('tutor_student_assocs')
 						->where([
 							['tutor_id', '=', $tutor_id],
@@ -120,14 +130,17 @@ class SessionController extends Controller
 
 			$session_matches = [];
 			$session_minutes = ($validatedData['session_hours']*60) + $validatedData['session_mins'];
-			$session_date = strtotime($validatedData['session_date']);
 			date_default_timezone_set('America/Chicago');
+			$session_date = strtotime($validatedData['session_date']);
 			$session_date = date('Y-m-d', $session_date);
 
 			if (!$session_minutes) abort(400, 'Session must have time');
 
-			foreach ($validatedData['tutor_list'] as $tutor_id) {
-				foreach ($validatedData['student_list'] as $student_id) {
+			$tutor_list = array_unique($validatedData['tutor_list']);
+			$student_list = array_unique($validatedData['student_list']);
+
+			foreach ($tutor_list as $tutor_id) {
+				foreach ($student_list as $student_id) {
 					$match = DB::table('tutor_student_assocs')
 						->where([
 							['tutor_id', '=', $tutor_id],
@@ -172,7 +185,7 @@ class SessionController extends Controller
 		//print_r($request);
 
 
-		return response()->json('Session created!');
+		return response()->json('Session updated!');
 	}
 
 	public function match_list()

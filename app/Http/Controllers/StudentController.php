@@ -4,8 +4,7 @@ namespace App\Http\Controllers;
 use App\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
-use function MongoDB\BSON\toJSON;
+use Illuminate\Support\Facades\Storage;
 
 
 class StudentController extends Controller
@@ -22,11 +21,11 @@ class StudentController extends Controller
 		$validatedData = $request->validate([
 			'first_name' => 'required',
 			'last_name' => 'required',
-			'email' => 'required',
-			'address' => 'required',
-			'city' => 'required',
-			'state' => 'required',
-			'zip' => 'required',
+			'email' => 'nullable|email',
+			'address' => 'nullable',
+			'city' => 'nullable',
+			'state' => 'nullable',
+			'zip' => 'nullable',
 			'dob' => 'nullable|date',
 			'phone_cell' => 'nullable',
 			'phone_home' => 'nullable',
@@ -81,7 +80,7 @@ class StudentController extends Controller
 
 	public function student_list()
 	{
-		$student_data = DB::table('students')->get();
+		$student_data = Student::orderBy('last_name')->get();
 
 		return response()->json($student_data);
 	}
@@ -89,6 +88,22 @@ class StudentController extends Controller
 	public function update(Request $request, $id)
 	{
 		date_default_timezone_set('America/Chicago');
+
+		if (!empty($request['profile_image'])) {
+
+			if (stristr($request->input('profile_image'), 'image/jpeg')) $ext = 'jpeg';
+			if (stristr($request->input('profile_image'), 'image/jpg')) $ext = 'jpg';
+			if (stristr($request->input('profile_image'), 'image/png')) $ext = 'png';
+
+			$img = str_replace('data:image/'.$ext.';base64,','',$request->input('profile_image'));
+			$img = str_replace(' ', '+', $img);
+
+			$img_name = $id.'_'.time().'.'.$ext;
+
+			Storage::disk('public')->put("/student_profile_images/$img_name", base64_decode($img));
+
+			$request['profile_image'] = $img_name;
+		}
 
 		if (!empty($request['dob']))
 		{
@@ -109,6 +124,10 @@ class StudentController extends Controller
 		}
 
 		$student = Student::find($id);
+
+		// delete the old profile image
+		if (!empty($request['profile_image'])) Storage::disk('public')->delete("/student_profile_images/$student->profile_image");
+		else unset($request['profile_image']);
 
 		$input = $request->all();
 

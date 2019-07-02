@@ -34,7 +34,10 @@ Route::put('students/{id}', 'StudentController@update');
 Route::get('students', 'StudentController@student_list');
 
 Route::post('matches', 'MatchController@store');
+Route::put('matches/{id}', 'MatchController@update');
 Route::get('matches', 'MatchController@match_list');
+Route::get('match_locations', 'MatchController@location_list');
+
 
 Route::post('sessions', 'SessionController@store');
 Route::put('sessions/{id}', 'SessionController@update');

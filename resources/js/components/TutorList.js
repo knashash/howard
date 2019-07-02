@@ -3,11 +3,12 @@ import React, { Component } from 'react';
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { TabContent, TabPane, Nav, NavItem, NavLink, Card, Button, CardTitle, CardText, Row, Col} from 'reactstrap';
-import classnames from 'classnames';
+import { TabContent, TabPane, Card, Button, Row, Col} from 'reactstrap';
 import ModalProfile from './ModalProfile';
 import TutorProfile from "./TutorProfile";
 import NewTutor from "./NewTutor";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 class TutorList extends Component {
 
@@ -23,24 +24,48 @@ class TutorList extends Component {
 			modal_comp: 'profile',
 			modal_title: 'Add New Tutor',
 			show: false,
+			collapsed: true,
+			dropdownOpen: false,
+			isOpen: false
 		};
 		this.setTutorListData = this.setTutorListData.bind(this);
+		this.toggle_nav = this.toggle_nav.bind(this);
+	}
+
+	toggle_nav() {
+		this.setState({
+			isOpen: !this.state.isOpen
+		});
+	}
+
+	notify = (message) => {
+
+		if (message.type == 'success') toast.success(message.text);
+		else toast.error(message.text);
 	}
 
 	setTutorListData() {
-
-		var self = this
-		axios.get('/api/tutors').then(function (response) {
-			self.setState({
-				data: response.data
-			})
-		})
-			.catch(function (error) {
-				console.log(error);
-			});
-
+		this.updateTutorData()
 		this._modal.toggle();
 	}
+
+	updateTutorData = () => {
+	var self = this
+	axios.get('/api/tutors').then(function (response) {
+		self.setState({
+			data: response.data
+		})
+	})
+.catch(function (error) {
+		console.log(error);
+	});
+}
+
+	handleRemoveMeetingDetails = idx => () => {
+		this.setState({
+			match_meeting_details: this.state.match_meeting_details.filter((s, sidx) => idx !== sidx)
+		});
+	};
 
 	toggle(tab) {
 		if (this.state.activeTab !== tab) {
@@ -53,14 +78,14 @@ class TutorList extends Component {
 	newTutor() {
 		this.setState({
 			modal_comp : 'tutor',
-			profile_data : undefined
+			profile_data : undefined,
+			modal_title: 'Add New Tutor',
 		})
 
 		this._modal.toggle();
 		this._modal.setState({modal_size:'lg'});
 
 	}
-
 
 	handleEdit(row) {
 		this.setState({
@@ -79,6 +104,10 @@ class TutorList extends Component {
 			marginRight: '10px'
 		}
 
+		const actionButton = {
+			bgColor: 'green'
+		}
+
 		const columns2 = Object.keys({tutor_data}).map((key, id)=>{
 			return {
 				Header: id,
@@ -94,6 +123,30 @@ class TutorList extends Component {
 			accessor: 'last_name'
 		},
 			{
+				Header: 'Email',
+				accessor: 'email'
+			},
+			{
+				Header: 'Phone (cell)',
+				accessor: 'phone_cell'
+			},
+			{
+				Header: 'Gender',
+				accessor: 'gender'
+			},
+			{
+				Header: 'Student(s)',
+				accessor: 'student_list'
+			},
+			{
+				Header: 'Entry Date',
+				accessor: 'date_entry'
+			},
+			{
+				Header: 'Exit Date',
+				accessor: 'date_exit'
+			},
+			{
 				Header: '',
 				Cell: row => (
 					<div>
@@ -105,8 +158,8 @@ class TutorList extends Component {
 
 		return (
 			<div>
-				<Row>
-					<Col sm="8" md={{ size: 2, offset: 10 }}><Button color="primary" onClick={this.newTutor}>New Tutor</Button>{' '}</Col>
+				<Row style={{backgroundColor: '#f1f1f1', textAlign:'Right', paddingRight: '10px'}}>
+					<Col ><Button size="sm" color="primary" onClick={this.newTutor}>New Tutor</Button>{' '}</Col>
 				</Row>
 
 				<Row>
@@ -132,6 +185,7 @@ class TutorList extends Component {
 								case "tutor": return <NewTutor
 									setTutorListData={this.setTutorListData}
 									selectedProfile={this.state.profile_data}
+									notify = {this.notify}
 								></NewTutor>
 								default:      return <TutorProfile selectedProfile={this.state.profile_data}/>
 							}

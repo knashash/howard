@@ -1,7 +1,7 @@
 // resources/assets/js/components/NewTutor.js
 import axios from 'axios'
 import React, { Component } from 'react'
-import {Form, FormGroup, Label, Input, FormText, Container, Row, Col, Button, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import {Form, FormGroup, Label, Input, FormText, Container, Row, Col, Button, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Media  } from 'reactstrap';
 import confirm from 'reactstrap-confirm';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -30,7 +30,8 @@ class NewTutor extends Component {
 			errors: [],
 			selectedProfile: [],
 			submit_text: 'Add Tutor',
-			profile_picture: false
+			profile_image: false,
+			image_url: profile_image_placeholder
 		}
 		this.handleFieldChange = this.handleFieldChange.bind(this)
 		this.handleFileChange = this.handleFileChange.bind(this)
@@ -59,7 +60,8 @@ class NewTutor extends Component {
 		reader.readAsDataURL(files[0]);
 		reader.onload=(e)=>{
 			this.setState({
-				profile_picture: e.target.result
+				profile_image: e.target.result,
+				image_url: e.target.result
 			});
 		}
 	}
@@ -84,8 +86,8 @@ class NewTutor extends Component {
 
 		event.preventDefault()
 
+		const notify_obj = [];
 		const { history } = this.props
-
 		const tutor = this.state.selectedProfile
 
 		const tutor_updated = {
@@ -105,7 +107,7 @@ class NewTutor extends Component {
 			date_exit: this.state.date_exit,
 			active: this.state.active,
 			notes: this.state.notes,
-			profile_picture: this.state.profile_picture
+			profile_image: this.state.profile_image
 		}
 
 		if (tutor.id)
@@ -120,12 +122,15 @@ class NewTutor extends Component {
 					var self = this
 					axios.put(`/api/tutors/${tutor.id}`, tutor_updated)
 						.then(function (response) {
-							// redirect to the homepage
-							//history.push('/')
-							console.log('calling the test func');
+							notify_obj.type = 'success';
+							notify_obj.text = response.data;
+							self.props.notify(notify_obj);
 							self.props.setTutorListData();
 						})
 						.catch(function (error) {
+							notify_obj.text = 'Error Updating Tutor! '+error.response.data.message;
+							notify_obj.type = 'error';
+							self.props.notify(notify_obj);
 							self.setState({
 								errors: error.response.data.errors
 							})
@@ -148,12 +153,14 @@ class NewTutor extends Component {
 					var self = this
 					axios.post('/api/tutors', tutor_updated)
 						.then(function (response) {
-							// redirect to the homepage
-							//history.push('/')
-							console.log('calling the test func');
+							notify_obj.type = 'success';
+							notify_obj.text = response.data;
+							self.props.notify(notify_obj);
 							self.props.setTutorListData();
 						})
 						.catch(function (error) {
+							notify_obj.text = 'Error Creating Tutor! '+error.response.data.message;
+							notify_obj.type = 'error';
 							self.setState({
 								errors: error.response.data.errors
 							})
@@ -200,7 +207,8 @@ class NewTutor extends Component {
 			date_exit: e.date_exit,
 			active: e.active,
 			notes: e.notes,
-			submit_text: submitTextState
+			submit_text: submitTextState,
+			image_url: e.image_url
 		})
 
 	}
@@ -225,20 +233,36 @@ class NewTutor extends Component {
 			marginTop: '10px'
 		};
 
+		const profileImgStyle = {
+			maxHeight: '128px',
+			maxWidth: '128px'
+		};
+
 		return (
 
 			<Container>
 				<Form>
 					<Row>
-						<Col sm="6">
-							<FormGroup>
-									<Label for="exampleFile">File</Label>
-									<Input type="file" name="file" id="exampleFile" onChange={this.handleFileChange} />
-									<FormText color="muted">
-										This is some placeholder block-level help text for the above input.
-										It's a bit lighter and easily wraps to a new line.
-									</FormText>
-							</FormGroup>
+						<Col sm="12">
+
+							<Media>
+								<Media left href="#">
+									<Media object style={profileImgStyle} src={this.state.image_url} alt="Generic placeholder image" />
+								</Media>
+								<Media body>
+									<FormGroup>
+										<Input size="sm" type="file" name="profile_image" id="profile_image" onChange={this.handleFileChange} />
+										<FormText color="muted">
+											Upload an image to update the profile picture
+										</FormText>
+									</FormGroup>
+								</Media>
+							</Media>
+						</Col>
+					</Row>
+					<Row>
+						<Col sm="12">
+							<hr/>
 						</Col>
 					</Row>
 					<Row>

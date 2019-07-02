@@ -10,7 +10,7 @@ class MatchMeetingDetail extends Model
 {
 	protected $guarded = ['id'];
 
-	protected $appends = ['location_name'];
+	protected $appends = ['location_name','meeting_time'];
 
 	/**
 	 * The matches the details belong to
@@ -32,5 +32,10 @@ class MatchMeetingDetail extends Model
 	{
 		$location_data = MatchMeetingLocation::find($this->match_location_id);
 		return $location_data->name;
+	}
+
+	public function getMeetingTimeAttribute()
+	{
+		return date('g:i A', strtotime($this->time));
 	}
 }

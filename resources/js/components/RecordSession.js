@@ -12,6 +12,8 @@ class RecordSession extends Component {
 	constructor(props, context) {
 		super(props, context);
 
+		let offset = -5;
+
 		this.state = {
 			inputs: ['input-0'],
 			tutors: [],
@@ -20,13 +22,13 @@ class RecordSession extends Component {
 			dropdownOpen: false,
 			tutor_list: [],
 			student_list: [],
-			sessionDate: new Date(),
-			sessionCategory: 1,
-			inClass: 0,
+			sessionDate: moment().format('YYYY-MM-DD'),
+			session_category: 1,
+			inClass: false,
 			sessionMins: 0,
 			sessionHours: 0,
 			sessionNotes: '',
-			selectedSession: [],
+			selectedSession: undefined,
 			submit_text: 'Add Session'
 		};
 
@@ -37,10 +39,16 @@ class RecordSession extends Component {
 		this.handleSessionCategoryChange = this.handleSessionCategoryChange.bind(this);
 		this.handleChange = this.handleChange.bind(this);
 		this.handleCreateNewSession = this.handleCreateNewSession.bind(this);
+		this.handleInClassChange = this.handleInClassChange.bind(this);
 		this.populateSessionData = this.populateSessionData.bind(this);
 	}
 
+	handleInClassChange (e) {
+		this.setState({inClass: e.target.checked});
+	}
+
 	handleSessionCategoryChange (e) {
+		console.log(e.target.value)
 		this.setState({session_category: e.target.value});
 	}
 
@@ -68,7 +76,7 @@ class RecordSession extends Component {
 			})
 		})
 
-		if (this.props.selectedSession && Object.keys(this.props.selectedSession).length > 1) {
+		if (this.props.selectedSession !== undefined) {
 			this.setState({selectedSession: this.props.selectedSession}, function () {
 				this.populateSessionData();
 			});
@@ -78,17 +86,18 @@ class RecordSession extends Component {
 
 	populateSessionData() {
 
-		console.log(this.state.selectedSession);
-
 
 		const tutorIds = []
 		const studentIds = []
 		this.state.selectedSession.matches.forEach(function (match) {
-			tutorIds.push(match.tutor_id)
-			studentIds.push(match.student_id)
-		});
 
-		console.log(tutorIds);
+			if(tutorIds.indexOf(match.tutor_id) === -1) {
+				tutorIds.push(match.tutor_id);
+			}
+			if(studentIds.indexOf(match.student_id) === -1) {
+				studentIds.push(match.student_id);
+			}
+		});
 
 		const sessionDate = moment(this.state.selectedSession.session_date).toDate()
 
@@ -129,11 +138,14 @@ class RecordSession extends Component {
 		}
 
 		this.setState({[e.target.name]: value}, function () {
-			//console.log(this.state.tutor_list)
+			console.log(this.state.tutor_list)
+			console.log(this.state.student_list)
 		});
 	}
 
 	async handleCreateNewSession (event) {
+
+		const notify_obj = [];
 
 		event.preventDefault();
 
@@ -142,7 +154,7 @@ class RecordSession extends Component {
 		const session_data = {
 			student_list: this.state.student_list,
 			tutor_list: this.state.tutor_list,
-			category_id: this.state.sessionCategory,
+			category_id: this.state.session_category,
 			notes: this.state.sessionNotes,
 			in_class: this.state.inClass,
 			session_date: this.state.sessionDate,
@@ -150,7 +162,7 @@ class RecordSession extends Component {
 			session_hours: this.state.sessionHours
 		};
 
-		if (session.id)
+		if (session !== undefined)
 		{
 			try {
 				let response = await confirm({
@@ -162,11 +174,15 @@ class RecordSession extends Component {
 					var self = this
 					axios.put(`/api/sessions/${session.id}`, session_data)
 						.then(function (response) {
-							// redirect to the homepage
-							//history.push('/')
 							self.props.setSessionListData();
+							notify_obj.type = 'success';
+							notify_obj.text = response.data;
+							self.props.notify(notify_obj);
 						})
-						.catch(function (error) {
+						.catch(function (response) {
+							notify_obj.text = 'Error Updating Session! '+response;
+							notify_obj.type = 'error';
+							self.props.notify(notify_obj);
 							self.setState({
 								errors: error.response.data.errors
 							})
@@ -189,12 +205,16 @@ class RecordSession extends Component {
 
 					axios.post('/api/sessions', session_data)
 						.then(function (response) {
-							// redirect to the homepage
-							//history.push('/')
+							notify_obj.type = 'success';
+							notify_obj.text = response.data;
+							self.props.notify(notify_obj);
 							self.props.setSessionListData();
 						})
 						.catch(function (response) {
-
+							notify_obj.text = 'Error Creating Session! '+response;
+							console.log(response.data);
+							notify_obj.type = 'error';
+							self.props.notify(notify_obj);
 						})
 				}
 
@@ -235,7 +255,7 @@ class RecordSession extends Component {
 						<Col sm="4">
 							<FormGroup>
 								<Label for="sessionCategory">Category:</Label>
-								<Input type="select" name="sessionCategory" id="sessionCategory" value={this.state.session_category} onChange={this.handleChange} >
+								<Input type="select" name="sessionCategory" id="sessionCategory" value={this.state.session_category} onChange={this.handleSessionCategoryChange} >
 									{this.state.session_categories.map(function(e, i){
 										return <option value={e.id} key={e.id}>{[ e.name]}</option>
 									}, this)}
@@ -246,7 +266,7 @@ class RecordSession extends Component {
 						<Col sm="4">
 							<FormGroup check>
 								<Label check>
-									<Input type="checkbox" name="inClass" checked={this.state.inClass} onChange={this.handleChange}/>{' '}
+									<Input type="checkbox" name="inClass" checked={this.state.inClass} onChange={this.handleInClassChange}/>{' '}
 									In-Class
 								</Label>
 							</FormGroup>
@@ -298,7 +318,7 @@ class RecordSession extends Component {
 								<Label for="tutorSelect">Select Tutor(s)</Label>
 								<Input type="select" name="tutor_list" id="tutorSelect" value={this.state.tutor_list} onChange={this.updateSessionList} multiple>
 									{this.state.tutors.map(function(e, i){
-										return <option value={e.id} key={i}>{[ e.first_name + ' ' + e.last_name]}</option>
+										return <option value={e.id} key={i}>{[ e.last_name + ', ' +e.first_name]}</option>
 									}, this)}
 								</Input>
 							</FormGroup>
@@ -310,11 +330,10 @@ class RecordSession extends Component {
 								<Label for="studentSelect">Select Student(s)</Label>
 								<Input type="select" name="student_list" id="studentSelect" value={this.state.student_list} onChange={this.updateSessionList} multiple>
 									{this.state.students.map(function(e, i){
-										return <option value={e.id} key={i}>{[ e.first_name + ' ' + e.last_name]}</option>
+										return <option value={e.id} key={i}>{[ e.last_name + ', ' +e.first_name]}</option>
 									}, this)}
 								</Input>
 							</FormGroup>
-
 
 						</Col>
 

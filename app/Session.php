@@ -6,14 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Session extends Model
 {
-	protected $appends = ['category_name','duration','hours','mins'];
+	protected $appends = ['category_name','duration','hours','mins','tutors','students'];
 
 	/**
 	 * The matches that belong to the session
 	 */
 	public function matches()
 	{
-		return $this->belongsToMany('App\Match', 'session_match_assocs','session_id', 'tutor_student_assoc_id')->withPivot('tutor_student_assoc_id', 'session_id');
+		return $this->belongsToMany('App\Match', 'session_match_assocs','session_id', 'tutor_student_assoc_id');
 	}
 
 	/**
@@ -42,6 +42,36 @@ class Session extends Model
 	public function getMinsAttribute()
 	{
 		return $minutes = ($this->minutes % 60);
+	}
+
+	public function getStudentsAttribute()
+	{
+		$students = '';
+
+		$i=0;
+		foreach ($this->matches as $match)
+		{
+			if ($i) $students .= ', '.$match->student->first_name.' '.$match->student->last_name;
+			else $students = $match->student->first_name.' '.$match->student->last_name;
+			$i++;
+		}
+
+		return $students;
+	}
+
+	public function getTutorsAttribute()
+	{
+		$tutors = '';
+
+		$i=0;
+		foreach ($this->matches as $match)
+		{
+			if ($i) $tutors .= ', '.$match->tutor->first_name.' '.$match->tutor->last_name;
+			else $tutors = $match->tutor->first_name.' '.$match->tutor->last_name;
+			$i++;
+		}
+
+		return $tutors;
 	}
 
 	private function _convertToHoursMins($time, $format = '%02d:%02d') {

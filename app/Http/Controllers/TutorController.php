@@ -2,14 +2,9 @@
 namespace App\Http\Controllers;
 
 use App\Tutor;
-use App\Match;
-use App\Student;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Controllers\Controller;
-use function MongoDB\BSON\toJSON;
 
 
 class TutorController extends Controller
@@ -17,36 +12,24 @@ class TutorController extends Controller
 	public function index()
 	{
 		$tutor_data = Tutor::with(['students'])->get();
-		$student_data = Student::with(['tutors'])->get();
-		$match_data = Match::with(['tutor', 'student', 'match_meeting_details'])->get();
+		//$student_data = Student::with(['tutors'])->get();
+		//$match_data = Match::with(['tutor', 'student', 'match_meeting_details'])->get();
 
 		//$user->roles()->attach($roleId);
-
-
-		foreach ($match_data as &$match) {
-			//print_r($match->match_meeting_details->location_name = 'chicago');
-			//$match->match_meeting_details->location_name = 'chicago';
-
-			foreach ($match->match_meeting_details as $match_meeting_detail)
-			{
-				//print_r($match_meeting_detail);
-				//die();
-			}
-
-		}
 
 
 		//$match_data->match_meeting_details->attach('location_name');
 
 		//print_r($match_data);
 		//die();
+		$profile_img_placeholder = asset( Storage::url('profile_placeholder.png'));
 
-		return view('admin', ['tutor_data' => $tutor_data, 'student_data' => $student_data, 'match_data' => $match_data] );
+		return view('admin', ['tutor_data' => $tutor_data, 'profile_image_placeholder' => $profile_img_placeholder] );
 	}
 
 	public function tutor_list()
 	{
-		$tutor_data = Tutor::get();
+		$tutor_data = Tutor::orderBy('last_name')->get();
 
 		return response()->json($tutor_data);
 	}
@@ -56,11 +39,11 @@ class TutorController extends Controller
 		$validatedData = $request->validate([
 			'first_name' => 'required',
 			'last_name' => 'required',
-			'email' => 'required',
-			'address' => 'required',
-			'city' => 'required',
-			'state' => 'required',
-			'zip' => 'required',
+			'email' => 'nullable|email',
+			'address' => 'nullable',
+			'city' => 'nullable',
+			'state' => 'nullable',
+			'zip' => 'nullable',
 			'dob' => 'nullable|date',
 			'phone_cell' => 'nullable',
 			'phone_home' => 'nullable',
@@ -117,25 +100,21 @@ class TutorController extends Controller
 	{
 		date_default_timezone_set('America/Chicago');
 
-		if (stristr($request->input('profile_picture'),'image/jpeg')) $ext = 'jpeg';
-		if (stristr($request->input('profile_picture'),'image/jpg')) $ext = 'jpg';
-		if (stristr($request->input('profile_picture'),'image/png')) $ext = 'png';
+		if (!empty($request['profile_image'])) {
 
-		$img = str_replace('data:image/'.$ext.';base64,','',$request->input('profile_picture'));
-		$img = str_replace(' ', '+', $img);
+			if (stristr($request->input('profile_image'), 'image/jpeg')) $ext = 'jpeg';
+			if (stristr($request->input('profile_image'), 'image/jpg')) $ext = 'jpg';
+			if (stristr($request->input('profile_image'), 'image/png')) $ext = 'png';
 
+			$img = str_replace('data:image/'.$ext.';base64,','',$request->input('profile_image'));
+			$img = str_replace(' ', '+', $img);
 
-		Storage::put('/public/letssee.'.$ext, base64_decode($img));
+			$img_name = $id.'_'.time().'.'.$ext;
 
+			Storage::disk('public')->put("/tutor_profile_images/$img_name", base64_decode($img));
 
-		//$path = $request->input('profile_picture')->store('avatars');
-
-		//$path = $request->file('profile_picture')->store('avatars');
-
-		//Storage::put('file.jpg', $request->file('profile_picture'));
-
-		//Storage::put('file.jpg', base64_decode($img));
-
+			$request['profile_image'] = $img_name;
+		}
 
 		if (!empty($request['dob']))
 		{
@@ -159,7 +138,9 @@ class TutorController extends Controller
 
 		$tutor = Tutor::find($id);
 
-		unset($request['profile_picture']);
+		// delete the old profile image
+		if (!empty($request['profile_image'])) Storage::disk('public')->delete("/tutor_profile_images/$tutor->profile_image");
+		else unset($request['profile_image']);
 
 		$input = $request->all();
 

@@ -13,10 +13,10 @@
                 @if(!empty($tutor_data)) var tutor_data = @json($tutor_data); @endif
                 @if(!empty($student_data)) var student_data = @json($student_data); @endif
                 @if(!empty($match_data)) var match_data = @json($match_data); @endif
+                @if(!empty($profile_image_placeholder)) var profile_image_placeholder = @json($profile_image_placeholder); @endif
 
         console.log(tutor_data);
-					 console.log(student_data);
-					 console.log(match_data);
+
     </script>
 
     <!-- Scripts -->
@@ -55,11 +55,13 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
                             </li>
+
+                            <!--
                             <li class="nav-item">
                                 @if (Route::has('register'))
                                     <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
                                 @endif
-                            </li>
+                            </li>-->
                         @else
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
@@ -67,15 +69,21 @@
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
                                         {{ __('Logout') }}
                                     </a>
 
+                                    <a class="dropdown-item" href="{{ route('register') }}">
+                                        {{ __('Register User') }}
+                                    </a>
+
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                                         @csrf
                                     </form>
+
                                 </div>
                             </li>
                         @endguest

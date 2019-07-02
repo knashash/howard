@@ -2,13 +2,13 @@ import axios from 'axios'
 import React, { Component } from 'react';
 import ReactTable from "react-table";
 import "react-table/react-table.css";
-import Modal from '../components/Modal/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { TabContent, TabPane, Nav, NavItem, NavLink, Card, Button, CardTitle, CardText, Row, Col } from 'reactstrap';
-import classnames from 'classnames';
 import StudentAddUpdate from "./StudentAddUpdate";
 import ModalProfile from "./ModalProfile";
 import StudentProfile from "./StudentProfile";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 class StudentList extends Component {
 
@@ -17,7 +17,7 @@ class StudentList extends Component {
 		this.state = {
 			activeTab: '1',
 			profile_data: [],
-			data: student_data,
+			data: [],
 			modal_comp: 'profile',
 			modal_title: 'New Student Form',
 			show: false,
@@ -29,7 +29,15 @@ class StudentList extends Component {
 	}
 
 	setStudentListData() {
+		this.reloadStudentData()
+		this._modal.toggle();
+	}
 
+	componentWillMount () {
+		this.reloadStudentData()
+	}
+
+	reloadStudentData = () => {
 		var self = this
 		axios.get('/api/students').then(function (response) {
 			self.setState({
@@ -39,8 +47,12 @@ class StudentList extends Component {
 			.catch(function (error) {
 				console.log(error);
 			});
+	};
 
-		this._modal.toggle();
+	notify = (message) => {
+
+		if (message.type == 'success') toast.success(message.text);
+		else toast.error(message.text);
 	}
 
 	newStudent() {
@@ -93,6 +105,34 @@ class StudentList extends Component {
 			accessor: 'last_name'
 		},
 			{
+				Header: 'Dob',
+				accessor: 'dob'
+			},
+			{
+				Header: 'Age',
+				accessor: 'age'
+			},
+			{
+				Header: 'Gender',
+				accessor: 'gender'
+			},
+			{
+				Header: 'Ethnic Group',
+				accessor: 'ethnic_group'
+			},
+			{
+				Header: 'First Language',
+				accessor: 'first_language'
+			},
+			{
+				Header: 'Country of Origin',
+				accessor: 'country_of_origin'
+			},
+			{
+				Header: 'Employment Status',
+				accessor: 'employment_status'
+			},
+			{
 				Header: '',
 				Cell: row => (
 					<div>
@@ -105,9 +145,10 @@ class StudentList extends Component {
 		return (
 
 			<div>
-			<Row>
-			<Col sm="8" md={{ size: 2, offset: 10 }}><Button color="primary" onClick={this.newStudent}>New Student</Button>{' '}</Col>
-		</Row>
+
+				<Row style={{backgroundColor: '#f1f1f1', textAlign:'Right', paddingRight: '10px'}}>
+					<Col ><Button size="sm" color="primary" onClick={this.newStudent}>New Student</Button>{' '}</Col>
+				</Row>
 
 		<Row>
 			<Col>
@@ -132,6 +173,7 @@ class StudentList extends Component {
 				case "student": return <StudentAddUpdate
 					setStudentListData={this.setStudentListData}
 					selectedProfile={this.state.profile_data}
+					notify = {this.notify}
 				></StudentAddUpdate>
 				default:      return <StudentProfile selectedProfile={this.state.profile_data}/>
 			}

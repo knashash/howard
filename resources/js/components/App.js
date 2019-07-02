@@ -7,9 +7,18 @@ import Header from './Header'
 import NewProject from './NewProject'
 import ProjectsList from './ProjectsList'
 import SingleProject from './SinglqeProject'
-class App extends Component {
-	render () {
-		return (
+import { transitions, positions, Provider as AlertProvider } from 'react-alert'
+import AlertTemplate from 'react-alert-template-basic'
+
+
+const App = () => {
+	const alert = useAlert()
+	const topRightAlert = useAlert(TopRightAlertContext)
+
+	return (
+		<div>
+
+
 			<BrowserRouter>
 				<div>
 					<Header />
@@ -20,8 +29,25 @@ class App extends Component {
 					</Switch>
 				</div>
 			</BrowserRouter>
-		)
-	}
+		</div>
+
+
+	)
 }
 
-ReactDOM.render(<App />, document.getElementById('app'))
+const Root = () => (
+	<AlertProvider template={AlertTemplate}>
+		<AlertProvider
+			template={AlertTemplate}
+			position={positions.TOP_RIGHT}
+			context={TopRightAlertContext}
+		>
+			<App />
+		</AlertProvider>
+	</AlertProvider>
+)
+
+
+
+
+ReactDOM.render(<Root />, document.getElementById('app'))
