@@ -32,7 +32,9 @@ Route::middleware(['auth'])->group(function () {
 		return view('tutor-application');
 	});
 
-	Route::view('/{path?}', 'tasker');
+	//Route::any('/{path?}', 'TutorController@index');
+
+	Route::redirect('/', '/data');
 
 	Route::get('/home', 'HomeController@index')->name('home');
 });
