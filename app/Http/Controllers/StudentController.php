@@ -11,7 +11,7 @@ class StudentController extends Controller
 {
 	public function index()
 	{
-		$data = DB::table('students')->select('first_name', 'last_name')->where('active', 1)->get();
+		$data = DB::table('students')->select('first_name', 'last_name')->get();
 
 		return view('admin', ['data' => $data]);
 	}
@@ -80,7 +80,7 @@ class StudentController extends Controller
 
 	public function student_list()
 	{
-		$student_data = Student::orderBy('last_name')->where('active', 1)->get();
+		$student_data = Student::orderBy('last_name')->get();
 
 		return response()->json($student_data);
 	}

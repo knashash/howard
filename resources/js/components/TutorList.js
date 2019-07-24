@@ -147,6 +147,10 @@ class TutorList extends Component {
 				accessor: 'date_exit'
 			},
 			{
+				Header: 'Active',
+				accessor: 'active'
+			},
+			{
 				Header: '',
 				Cell: row => (
 					<div>

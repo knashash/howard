@@ -133,6 +133,10 @@ class StudentList extends Component {
 				accessor: 'employment_status'
 			},
 			{
+				Header: 'Active',
+				accessor: 'active'
+			},
+			{
 				Header: '',
 				Cell: row => (
 					<div>
