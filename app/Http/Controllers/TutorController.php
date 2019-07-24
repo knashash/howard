@@ -11,7 +11,7 @@ class TutorController extends Controller
 {
 	public function index()
 	{
-		$tutor_data = Tutor::with(['students'])->get();
+		$tutor_data = Tutor::with(['students'])->where('active', 1)->get();
 		//$student_data = Student::with(['tutors'])->get();
 		//$match_data = Match::with(['tutor', 'student', 'match_meeting_details'])->get();
 
@@ -29,7 +29,7 @@ class TutorController extends Controller
 
 	public function tutor_list()
 	{
-		$tutor_data = Tutor::orderBy('last_name')->get();
+		$tutor_data = Tutor::orderBy('last_name')->where('active', 1)->get();
 
 		return response()->json($tutor_data);
 	}

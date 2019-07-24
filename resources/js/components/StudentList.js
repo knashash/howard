@@ -156,8 +156,8 @@ class StudentList extends Component {
 					noDataText="Oh Noes! No Data"
 					data={this.state.data}
 					columns={columns}
-					defaultPageSize = {15}
-					pageSizeOptions = {[3, 6]}
+					defaultPageSize = {-1}
+					showPagination={false}
 				/>
 			</Col>
 		</Row>
