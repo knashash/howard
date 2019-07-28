@@ -244,7 +244,7 @@ class NewStudent extends Component {
 									<FormGroup>
 										<Input size="sm" type="file" name="profile_image" id="profile_image" label="Yo, pick a file!" onChange={this.handleFileChange} />
 										<FormText color="muted">
-											Upload an image to update the profile picture
+											Upload an image to update the profile pictureh
 										</FormText>
 									</FormGroup>
 								</Media>
@@ -336,7 +336,7 @@ class NewStudent extends Component {
 							<FormGroup>
 								<label htmlFor="state">State</label>
 								<Input type="select" name="state" id="state" onChange={this.handleFieldChange} value={this.state.state}>
-									<option value="AL">Alabama</option>
+									<option value="AL">Alabamak</option>
 									<option value="AK">Alaska</option>
 									<option value="AZ">Arizona</option>
 									<option value="AR">Arkansas</option>
@@ -521,7 +521,7 @@ class NewStudent extends Component {
 
 					<Row>
 						<Col sm="12">
-							<label htmlFor="notes">Notes</label>
+							<label htmlFor="notes">Notesdddd</label>
 							<Input type="textarea"
 									 className={`form-control ${this.hasErrorFor('notes') ? 'is-invalid' : ''}`}
 									 id="notes"
@@ -530,6 +530,77 @@ class NewStudent extends Component {
 									 onChange={this.handleFieldChange}
 									 placeholder=""/>
 							{this.renderErrorFor('notes')}
+						</Col>
+					</Row>
+
+					<Row>
+						<Col>
+							<div>
+								<Card>
+									<CardBody>
+										<CardTitle>Match Meeting Details</CardTitle>
+										{this.state.match_meeting_details.map((meeting_details, idx) => (
+
+
+											<FormGroup row key={meeting_details.id}>
+												<label htmlFor={"location_" + idx}>Location</label>
+												<Col sm={3}>
+													<Input type="select"
+															 name="location"
+															 id={"location_" + idx}
+															 onChange={this.handleMeetingDetailsChange(idx)}
+															 value={meeting_details.match_location_id}>
+														{this.state.match_locations.map(function(e, i){
+															return <option value={e.id} key={e.id}>{[ e.name]}</option>
+														}, this)}
+													</Input>
+												</Col>
+
+												<label htmlFor={"day_" + idx}>Day</label>
+												<Col sm={2}>
+													<Input type="select"
+															 name="day"
+															 id={"day_" + idx}
+															 onChange={this.handleMeetingDetailsChange(idx)}
+															 value={meeting_details.day}>
+														<option></option>
+														<option>Sun</option>
+														<option>Mon</option>
+														<option>Tues</option>
+														<option>Wed</option>
+														<option>Thur</option>
+														<option>Fri</option>
+														<option>Sat</option>
+													</Input>
+												</Col>
+
+												<label htmlFor={"time_" + idx}>Time</label>
+												<Col sm={2}>
+													<Input type="text"
+															 name="time"
+															 id={"time_" + idx}
+															 onChange={this.handleMeetingDetailsChange(idx)}
+															 value={meeting_details.meeting_time}>
+													</Input>
+												</Col>
+
+												<Col sm={1}>
+													<span><i className="fa fa-times" aria-hidden="true" onClick={this.handleRemoveMeetingDetails(idx)}></i></span>
+												</Col>
+
+											</FormGroup>
+
+
+										))}
+
+										<FormGroup row>
+											<Col sm={{ size: 5 }}>
+												<Button size="sm" onClick={this.handleAddMeetingDetails}>Add Meeting Details</Button>
+											</Col>
+										</FormGroup>
+									</CardBody>
+								</Card>
+							</div>
 						</Col>
 					</Row>
 

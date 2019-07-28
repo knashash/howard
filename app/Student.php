@@ -9,7 +9,15 @@ class Student extends Model
 {
 	protected $guarded = ['id'];
 
-	protected $appends = ['image_url', 'age'];
+	protected $appends = ['image_url', 'age', 'tests'];
+
+	/**
+	 * Student testing
+	 */
+	public function test_results()
+	{
+		return $this->hasMany('App\StudentTest', 'student_id','id');
+	}
 
 	/**
 	 * The students that belong to the tutor.
@@ -39,5 +47,22 @@ class Student extends Model
 			return $age;
 		}
 
+	}
+
+	public function getTestsAttribute()
+	{
+		$test_data = [];
+		if (!empty($this->test_results))
+		{
+			foreach ($this->test_results as $test)
+			{
+				$test_details = 'Date: '.$test->test_date.' - '.$test->test_type.': '.$test->test_group.' '.$test->test_num.$test->test_letter.' '.$test->test_subject.' - Score:'.$test->test_score;
+				$test_data[] = $test_details;
+			}
+
+			$test_details_string = implode(', ',$test_data);
+
+			return $test_details_string;
+		}
 	}
 }

@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Student;
+use App\StudentTest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -80,7 +81,7 @@ class StudentController extends Controller
 
 	public function student_list()
 	{
-		$student_data = Student::orderBy('last_name')->get();
+		$student_data = Student::with(['test_results'])->orderBy('last_name')->get();
 
 		return response()->json($student_data);
 	}
@@ -88,6 +89,33 @@ class StudentController extends Controller
 	public function update(Request $request, $id)
 	{
 		date_default_timezone_set('America/Chicago');
+
+		// update the match meeting details first
+		if (!empty($request->student_tests))
+		{
+			// delete the current student tests
+			$deletedRows = StudentTest::where('student_id', $id)->delete();
+
+			//now insert the new student test data
+			$student_test_details = [];
+			foreach ($request->student_tests as $student_test)
+			{
+				$test_date = date('Y-m-d',strtotime($student_test['test_date']));
+
+				$student_test_details[] = [
+					'student_id' => $id,
+					'test_type' => $student_test['test_type'],
+					'test_date' => $test_date,
+					'test_group' => $student_test['test_group'],
+					'test_num' => $student_test['test_num'],
+					'test_letter' => $student_test['test_letter'],
+					'test_subject' => $student_test['test_subject'],
+					'test_score' => $student_test['test_score'],
+				];
+			}
+
+			StudentTest::insert($student_test_details);
+		}
 
 		if (!empty($request['profile_image'])) {
 
@@ -130,6 +158,8 @@ class StudentController extends Controller
 		else unset($request['profile_image']);
 
 		$input = $request->all();
+		unset($input['student_tests']);
+
 
 		$student->fill($input)->save();
 

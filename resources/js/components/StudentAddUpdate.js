@@ -1,10 +1,10 @@
 import axios from 'axios'
 import React, { Component } from 'react'
-import {Form, FormGroup, Label, Input, FormText, Container, Row, Col, Button, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Media } from 'reactstrap';
+import {Card, CardImg, CardText, CardBody, CardTitle, CardHeader, CardFooter, CardSubtitle, Form, FormGroup, Label, Input, FormText, Container, Row, Col, Button, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Media } from 'reactstrap';
 import confirm from 'reactstrap-confirm';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-
+import "./styles.css";
 
 class StudentAddUpdate extends Component {
 	constructor (props) {
@@ -24,10 +24,12 @@ class StudentAddUpdate extends Component {
 			phone_home: '',
 			date_entry: '',
 			date_exit: '',
+			test_date: '',
 			active: 1,
 			notes: '',
 			errors: [],
 			selectedProfile: [],
+			test_results: [],
 			submit_text: 'Add Student',
 			profile_image: false,
 			image_url: profile_image_placeholder
@@ -41,6 +43,7 @@ class StudentAddUpdate extends Component {
 		this.setDOB = this.setDOB.bind(this);
 		this.setDateEntry = this.setDateEntry.bind(this);
 		this.setDateExit = this.setDateExit.bind(this);
+		this.setTestDate = this.setTestDate.bind(this);
 	}
 
 	handleFieldChange (event) {
@@ -51,6 +54,73 @@ class StudentAddUpdate extends Component {
 			console.log(this.state.last_name);
 		})
 	}
+
+	handleAddTestResults = () => {
+		this.setState({
+			test_results: this.state.test_results.concat([{ test_date:"", test_type:"", test_score:"", test_group:""
+				, test_num:"", test_letter:"", test_subject:""}])
+		});
+	};
+
+	handleRemoveTestResults = idx => () => {
+		this.setState({
+			test_results: this.state.test_results.filter((s, sidx) => idx !== sidx)
+		});
+	};
+
+	handleTestResultsChange = idx => evt => {
+
+		let test_date;
+		let test_type;
+		let test_score;
+		let test_group;
+		let test_num;
+		let test_letter;
+		let test_subject;
+
+		const newTestResults = this.state.test_results.map((test_result, sidx) => {
+
+			test_date = test_result.test_date
+			test_score = test_result.test_score
+			test_type = test_result.test_type
+			test_group = test_result.test_group
+			test_num = test_result.test_num
+			test_letter = test_result.test_letter
+			test_subject = test_result.test_subject
+
+			if (sidx == idx)
+			{
+				if (evt instanceof Date)
+				{
+					test_date = evt
+				}
+				else
+				{
+					if (evt.target.name == 'test_score')  test_score = evt.target.value
+					if (evt.target.name == 'test_type')  test_type = evt.target.value
+					if (evt.target.name == 'test_group')  test_group = evt.target.value
+					if (evt.target.name == 'test_num')  test_num = evt.target.value
+					if (evt.target.name == 'test_letter')  test_letter = evt.target.value
+					if (evt.target.name == 'test_subject')  test_subject = evt.target.value
+				}
+
+				return { ...test_result, id:idx, test_date: test_date, test_score: test_score, test_type: test_type,
+					test_group: test_group, test_num: test_num, test_letter: test_letter, test_subject: test_subject,
+				}
+			}
+			else
+			{
+				return { ...test_result, id:sidx, test_date: test_date, test_score: test_score, test_type: test_type,
+					test_group: test_group, test_num: test_num, test_letter: test_letter, test_subject: test_subject,
+				}
+			}
+		});
+
+
+		this.setState({ test_results: newTestResults }, function () {
+			console.log(this.state.test_results);
+		})
+	};
 
 	handleFileChange (e) {
 		let files = e.target.files;
@@ -79,12 +149,22 @@ class StudentAddUpdate extends Component {
 			date_exit: date
 		});
 	}
+	setTestDate (date) {
+		this.setState({
+			test_date: date
+		});
+
+		this.setState({ test_date: date }, function () {
+			console.log(this.state.test_date);
+		})
+	}
 
 	async handleCreateNewStudent (event) {
 
 		event.preventDefault()
 
 		const { history } = this.props
+		const notify_obj = [];
 
 		const student = this.state.selectedProfile
 
@@ -105,7 +185,8 @@ class StudentAddUpdate extends Component {
 			date_exit: this.state.date_exit,
 			active: this.state.active,
 			notes: this.state.notes,
-			profile_image: this.state.profile_image
+			profile_image: this.state.profile_image,
+			student_tests: this.state.test_results
 		}
 
 		if (student.id)
@@ -120,12 +201,15 @@ class StudentAddUpdate extends Component {
 					var self = this
 					axios.put(`/api/students/${student.id}`, student_updated)
 						.then(function (response) {
-							// redirect to the homepage
-							//history.push('/')
-							console.log('calling the test func');
+							notify_obj.type = 'success';
+							notify_obj.text = response.data;
+							self.props.notify(notify_obj);
 							self.props.setStudentListData();
 						})
 						.catch(function (error) {
+							notify_obj.text = 'Error Updating Student! '+error.response.data.message;
+							notify_obj.type = 'error';
+							self.props.notify(notify_obj);
 							self.setState({
 								errors: error.response.data.errors
 							})
@@ -148,12 +232,14 @@ class StudentAddUpdate extends Component {
 					var self = this
 					axios.post('/api/students', student_updated)
 						.then(function (response) {
-							// redirect to the homepage
-							//history.push('/')
-							console.log('calling the test func');
+							notify_obj.type = 'success';
+							notify_obj.text = response.data;
+							self.props.notify(notify_obj);
 							self.props.setStudentListData();
 						})
 						.catch(function (error) {
+							notify_obj.text = 'Error Creating Student! '+error.response.data.message;
+							notify_obj.type = 'error';
 							self.setState({
 								errors: error.response.data.errors
 							})
@@ -204,7 +290,8 @@ class StudentAddUpdate extends Component {
 			active: e.active,
 			notes: e.notes,
 			submit_text: submitTextState,
-			image_url: e.image_url
+			image_url: e.image_url,
+			test_results: e.test_results
 		})
 
 	}
@@ -229,10 +316,35 @@ class StudentAddUpdate extends Component {
 			marginTop: '10px'
 		};
 
+		const testResultsStyle = {
+			fontSize: '10px',
+			width:'70px',
+		};
+
+		const testLetterStyle = {
+			fontSize: '10px',
+			width:'70px',
+		};
+
+		const datePickStyle = {
+			size:'10'
+		};
+
 		const profileImgStyle = {
 			maxHeight: '128px',
 			maxWidth: '128px'
 		};
+
+		const removeStyle = {
+			color: 'white',
+		};
+		const removeStyle2 = {
+			marginTop: '30px',
+		};
+
+		const testingDivStyle = {
+			marginTop: '20px'
+		}
 
 		return (
 
@@ -537,6 +649,158 @@ class StudentAddUpdate extends Component {
 							{this.renderErrorFor('notes')}
 						</Col>
 					</Row>
+
+					<Row noGutters>
+						<Col>
+							<div style={testingDivStyle}>
+								<Card>
+									<CardBody>
+										<CardTitle>Test Results</CardTitle>
+										{this.state.test_results.map((test_details, idx) => (
+
+
+											<Row noGutters>
+
+												<Col>
+													<FormGroup style={testResultsStyle}>
+														<label htmlFor={"test_date_" + idx}>Date</label>
+														<br/>
+														<DatePicker className='testDate'
+															selected={test_details.test_date}
+																		onChange={this.handleTestResultsChange(idx)}
+																		name="test_date"
+																		id={"test_date_" + idx}
+														/>
+													</FormGroup>
+												</Col>
+
+												<Col>
+													<FormGroup style={testResultsStyle}>
+														<label htmlFor={"test_type_" + idx}>Type</label>
+														<Input type="select"
+																 name="test_type"
+																 id={"test_type_" + idx}
+																 onChange={this.handleTestResultsChange(idx)}
+																 value={test_details.test_type}
+																 bsSize="small"
+																 style={testResultsStyle}>
+															<option></option>
+															<option>Pre</option>
+															<option>Post</option>
+														</Input>
+													</FormGroup>
+												</Col>
+
+												<Col>
+													<FormGroup style={testResultsStyle}>
+														<label htmlFor={"test_score_" + idx}>Score</label>
+														<Input type="text"
+																 name="test_score"
+																 id={"test_score_" + idx}
+																 onChange={this.handleTestResultsChange(idx)}
+																 value={test_details.test_score}
+																 bsSize="small"
+																 style={testResultsStyle}>
+														</Input>
+													</FormGroup>
+												</Col>
+
+												<Col>
+													<FormGroup style={testResultsStyle}>
+														<label htmlFor={"test_group_" + idx}>Group</label>
+														<Input type="select"
+																 name="test_group"
+																 id={"test_group_" + idx}
+																 onChange={this.handleTestResultsChange(idx)}
+																 value={test_details.test_group}
+																 bsSize="small"
+																 style={testResultsStyle}>
+															<option></option>
+															<option>Best Plus</option>
+															<option>Best Lit</option>
+															<option>Tabe</option>
+															<option>Sort</option>
+														</Input>
+													</FormGroup>
+												</Col>
+
+												<Col>
+													<FormGroup style={testResultsStyle}>
+														<label htmlFor={"num_" + idx}>Num</label>
+														<Input type="select"
+																 name="test_num"
+																 id={"test_num_" + idx}
+																 onChange={this.handleTestResultsChange(idx)}
+																 value={test_details.test_num}
+																 bsSize="small"
+																 style={testResultsStyle}>
+															<option></option>
+															<option>9</option>
+															<option>10</option>
+															<option>11</option>
+														</Input>
+													</FormGroup>
+												</Col>
+
+												<Col>
+													<FormGroup style={testResultsStyle}>
+														<label htmlFor={"test_letter_" + idx}>Letter</label>
+														<Input type="select"
+																 name="test_letter"
+																 id={"test_letter_" + idx}
+																 onChange={this.handleTestResultsChange(idx)}
+																 value={test_details.test_letter}
+																 bsSize="small"
+																 style={testResultsStyle}>
+															<option></option>
+															<option>A</option>
+															<option>D</option>
+															<option>E</option>
+															<option>M</option>
+														</Input>
+													</FormGroup>
+												</Col>
+
+												<Col>
+													<FormGroup style={testResultsStyle}>
+														<label htmlFor={"test_subject_" + idx}>Subject</label>
+														<Input type="select"
+																 name="test_subject"
+																 id={"test_subject_" + idx}
+																 onChange={this.handleTestResultsChange(idx)}
+																 value={test_details.test_subject}
+																 bsSize="small"
+																 style={testResultsStyle}>
+															<option></option>
+															<option>Reading</option>
+															<option>Math</option>
+														</Input>
+													</FormGroup>
+												</Col>
+
+												<Col sm={1}>
+													<FormGroup style={testResultsStyle}>
+														<label htmlFor={"remove" + idx} style={removeStyle}>Remove</label>
+														<span name="remove"><i className="fa fa-times" style={removeStyle2} aria-hidden="true" onClick={this.handleRemoveTestResults(idx)}></i></span>
+													</FormGroup>
+
+												</Col>
+											</Row>
+
+
+										))}
+
+										<FormGroup row>
+											<Col sm={{ size: 5 }}>
+												<Button size="sm" onClick={this.handleAddTestResults}>Add Result</Button>
+											</Col>
+										</FormGroup>
+									</CardBody>
+								</Card>
+							</div>
+						</Col>
+					</Row>
+
 
 					<Row>
 						<Col sm="12" md={{ size: 6, offset: 5 }} style={buttonRow}>

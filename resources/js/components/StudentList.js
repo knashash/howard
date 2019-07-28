@@ -133,6 +133,11 @@ class StudentList extends Component {
 				accessor: 'employment_status'
 			},
 			{
+				Header: 'Tests',
+				accessor: 'tests',
+				style:{ 'white-space': 'unset'}
+			},
+			{
 				Header: 'Active',
 				accessor: 'active'
 			},
