@@ -138,8 +138,8 @@ class StudentList extends Component {
 				style:{ 'white-space': 'unset'}
 			},
 			{
-				Header: 'Active',
-				accessor: 'active'
+				Header: 'Status',
+				accessor: 'status'
 			},
 			{
 				Header: '',

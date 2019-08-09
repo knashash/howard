@@ -522,6 +522,7 @@ class NewTutor extends Component {
 								<Input type="select" name="active" id="active" onChange={this.handleFieldChange} value={this.state.active}>
 									<option value="1">Active</option>
 									<option value="0">Inactive</option>
+									<option value="2">Ready To Match</option>
 								</Input>
 								{this.renderErrorFor('active')}
 							</FormGroup>

@@ -147,8 +147,8 @@ class TutorList extends Component {
 				accessor: 'date_exit'
 			},
 			{
-				Header: 'Active',
-				accessor: 'active'
+				Header: 'Status',
+				accessor: 'status'
 			},
 			{
 				Header: '',

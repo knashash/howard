@@ -9,7 +9,7 @@ class Tutor extends Model
 {
 	protected $guarded = ['id'];
 
-	protected $appends = ['image_url', 'student_list'];
+	protected $appends = ['image_url', 'student_list', 'status'];
 
 	/**
 	 * The students that belong to the tutor.
@@ -41,5 +41,12 @@ class Tutor extends Model
 		}
 
 		return $student_list;
+	}
+
+	public function getStatusAttribute()
+	{
+		if (empty($this->active)) return 'In-Active';
+		if ($this->active == 1) return 'Active';
+		if ($this->active == 2) return 'Ready To Match';
 	}
 }

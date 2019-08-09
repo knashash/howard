@@ -9,7 +9,7 @@ class Student extends Model
 {
 	protected $guarded = ['id'];
 
-	protected $appends = ['image_url', 'age', 'tests'];
+	protected $appends = ['image_url', 'age', 'tests', 'status'];
 
 	/**
 	 * Student testing
@@ -64,5 +64,12 @@ class Student extends Model
 
 			return $test_details_string;
 		}
+	}
+
+	public function getStatusAttribute()
+	{
+		if (empty($this->active)) return 'In-Active';
+		if ($this->active == 1) return 'Active';
+		if ($this->active == 2) return 'Waiting To Match';
 	}
 }
