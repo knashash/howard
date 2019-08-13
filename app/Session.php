@@ -47,13 +47,19 @@ class Session extends Model
 	public function getStudentsAttribute()
 	{
 		$students = '';
+		$students_arr = [];
 
 		$i=0;
 		foreach ($this->matches as $match)
 		{
-			if ($i) $students .= ', '.$match->student->first_name.' '.$match->student->last_name;
-			else $students = $match->student->first_name.' '.$match->student->last_name;
-			$i++;
+			if (!in_array($match->student->id, $students_arr))
+			{
+				$students_arr[] = $match->student->id;
+
+				if ($i) $students .= ', '.$match->student->first_name.' '.$match->student->last_name;
+				else $students = $match->student->first_name.' '.$match->student->last_name;
+				$i++;
+			}
 		}
 
 		return $students;
@@ -62,13 +68,19 @@ class Session extends Model
 	public function getTutorsAttribute()
 	{
 		$tutors = '';
+		$tutors_arr = [];
 
 		$i=0;
 		foreach ($this->matches as $match)
 		{
-			if ($i) $tutors .= ', '.$match->tutor->first_name.' '.$match->tutor->last_name;
-			else $tutors = $match->tutor->first_name.' '.$match->tutor->last_name;
-			$i++;
+			if (!in_array($match->tutor->id, $tutors_arr))
+			{
+				$tutors_arr[] = $match->tutor->id;
+
+				if ($i) $tutors .= ', ' . $match->tutor->first_name . ' ' . $match->tutor->last_name;
+				else $tutors = $match->tutor->first_name . ' ' . $match->tutor->last_name;
+				$i++;
+			}
 		}
 
 		return $tutors;
