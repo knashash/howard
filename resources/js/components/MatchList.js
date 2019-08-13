@@ -141,7 +141,7 @@ class MatchList extends Component {
 				</Row>
 
 				<ReactTable
-					noDataText="Oh Noes! No Data"
+					noDataText="Loading Data...."
 					data={this.state.data}
 					columns={columns}
 					defaultPageSize = {10}
