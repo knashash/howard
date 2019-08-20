@@ -9,7 +9,6 @@ import MatchList from './MatchList';
 import SessionList from './SessionList';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import axios from "axios";
 
 class DataList extends Component {
 

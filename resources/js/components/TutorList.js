@@ -7,6 +7,7 @@ import { TabContent, TabPane, Card, Button, Row, Col} from 'reactstrap';
 import ModalProfile from './ModalProfile';
 import TutorProfile from "./TutorProfile";
 import NewTutor from "./NewTutor";
+import { CSVLink, CSVDownload } from "react-csv";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -15,6 +16,7 @@ class TutorList extends Component {
 	constructor(props, context) {
 		super(props, context);
 
+		this.reactTable = React.createRef();
 		this.toggle = this.toggle.bind(this);
 		this.newTutor = this.newTutor.bind(this);
 		this.state = {
@@ -26,16 +28,39 @@ class TutorList extends Component {
 			show: false,
 			collapsed: true,
 			dropdownOpen: false,
-			isOpen: false
+			isOpen: false,
+			dataToDownload: [],
+			columns: []
 		};
 		this.setTutorListData = this.setTutorListData.bind(this);
 		this.toggle_nav = this.toggle_nav.bind(this);
+		this.download = this.download.bind(this);
 	}
 
 	toggle_nav() {
 		this.setState({
 			isOpen: !this.state.isOpen
 		});
+	}
+
+	download(event) {
+		const currentRecords = this.reactTable.getResolvedState().sortedData;
+		var data_to_download = []
+		console.log('Column Length ' + this.state.columns.length)
+		for (var index = 0; index < currentRecords.length; index++) {
+			let record_to_download = {}
+			for(var colIndex = 0; colIndex < this.state.columns.length-1 ; colIndex ++) {
+				console.log(this.state.columns[colIndex])
+				record_to_download[this.state.columns[colIndex].Header] = currentRecords[index][this.state.columns[colIndex].accessor]
+			}
+			data_to_download.push(record_to_download)
+
+		}
+
+		this.setState({ dataToDownload: data_to_download }, () => {
+			// click the CSVLink component to trigger the CSV download
+			this.csvLink.link.click()
+		})
 	}
 
 	notify = (message) => {
@@ -49,6 +74,10 @@ class TutorList extends Component {
 		this._modal.toggle();
 	}
 
+	componentWillMount () {
+		this.updateTutorData();
+	}
+
 	updateTutorData = () => {
 	var self = this
 	axios.get('/api/tutors').then(function (response) {
@@ -59,6 +88,55 @@ class TutorList extends Component {
 .catch(function (error) {
 		console.log(error);
 	});
+
+		let columns= [{
+			Header: 'First Name',
+			accessor: 'first_name'
+		},{
+			Header: 'Last Name',
+			accessor: 'last_name'
+		},
+			{
+				Header: 'Email',
+				accessor: 'email'
+			},
+			{
+				Header: 'Phone (cell)',
+				accessor: 'phone_cell'
+			},
+			{
+				Header: 'Gender',
+				accessor: 'gender'
+			},
+			{
+				Header: 'Student(s)',
+				accessor: 'student_list'
+			},
+			{
+				Header: 'Entry Date',
+				accessor: 'date_entry'
+			},
+			{
+				Header: 'Exit Date',
+				accessor: 'date_exit'
+			},
+			{
+				Header: 'Status',
+				accessor: 'status'
+			},
+			{
+				Header: '',
+				Cell: row => (
+					<div>
+						<span style={iconStyle}><i className="fa fa-pencil-square-o" aria-hidden="true" onClick={() => this.handleEdit(row.original)}></i></span>
+						<span><i className="fa fa-times" aria-hidden="true" onClick={() => handleDelete(row.original)}></i></span>
+					</div>
+				)
+			}]
+
+		this.setState({
+			columns: columns
+		})
 }
 
 	handleRemoveMeetingDetails = idx => () => {
@@ -108,14 +186,7 @@ class TutorList extends Component {
 			bgColor: 'green'
 		}
 
-		const columns2 = Object.keys({tutor_data}).map((key, id)=>{
-			return {
-				Header: id,
-				accessor: id
-			}
-		})
-
-		const columns = [{
+		const columns= [{
 			Header: 'First Name',
 			accessor: 'first_name'
 		},{
@@ -163,20 +234,26 @@ class TutorList extends Component {
 		return (
 			<div>
 				<Row style={{backgroundColor: '#f1f1f1', textAlign:'Right', paddingRight: '10px'}}>
-					<Col ><Button size="sm" color="primary" onClick={this.newTutor}>New Tutor</Button>{' '}</Col>
+					<Col ><Button size="sm" color="primary" onClick={this.newTutor}>New Tutor</Button>{' '} <Button size="sm" color="primary" onClick={this.download}>Export</Button>{' '}</Col>
 				</Row>
 
-				<Row>
-					<Col>
-						<ReactTable
-							noDataText="Oh Noes! No Data"
-							data={this.state.data}
-							columns={columns}
-							defaultPageSize = {-1}
-							showPagination={false}
-						/>
-					</Col>
-				</Row>
+				<div>
+					<CSVLink
+						data={this.state.dataToDownload}
+						filename="tutors.csv"
+						className="hidden"
+						ref={(r) => this.csvLink = r}
+						target="_blank"/>
+
+				</div>
+				<div>
+					<ReactTable ref={(r) => this.reactTable = r}
+									data={this.state.data} columns={columns}
+									defaultPageSize = {-1}
+									showPagination={false}
+					/>
+				</div>
+
 
 				<div>
 

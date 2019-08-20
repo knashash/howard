@@ -152,10 +152,8 @@ class SessionList extends Component {
 		}
 		this.setState({ dataToDownload: data_to_download }, () => {
 			// click the CSVLink component to trigger the CSV download
+			this.csvLink.link.click()
 		})
-
-		this.csvLink.link.click()
-
 	}
 
 	render() {
@@ -206,7 +204,7 @@ class SessionList extends Component {
 				<div>
 					<CSVLink
 						data={this.state.dataToDownload}
-						filename="data.csv"
+						filename="sessions.csv"
 						className="hidden"
 						ref={(r) => this.csvLink = r}
 						target="_blank"/>

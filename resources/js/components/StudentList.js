@@ -8,6 +8,7 @@ import StudentAddUpdate from "./StudentAddUpdate";
 import ModalProfile from "./ModalProfile";
 import StudentProfile from "./StudentProfile";
 import { ToastContainer, toast } from 'react-toastify';
+import { CSVLink, CSVDownload } from "react-csv";
 import 'react-toastify/dist/ReactToastify.css';
 
 class StudentList extends Component {
@@ -21,16 +22,40 @@ class StudentList extends Component {
 			modal_comp: 'profile',
 			modal_title: 'New Student Form',
 			show: false,
+			dataToDownload: [],
+			columns: []
 		};
 		this.showModal = this.showModal.bind(this);
 		this.setStudentListData = this.setStudentListData.bind(this);
 		this.toggle = this.toggle.bind(this);
 		this.newStudent = this.newStudent.bind(this);
+		this.download = this.download.bind(this);
 	}
 
 	setStudentListData() {
 		this.reloadStudentData()
 		this._modal.toggle();
+	}
+
+	download(event) {
+		const currentRecords = this.reactTable.getResolvedState().sortedData;
+
+		console.log(currentRecords.length)
+		var data_to_download = []
+		console.log('Column Length ' + this.state.columns.length)
+		for (var index = 0; index < currentRecords.length; index++) {
+			let record_to_download = {}
+			for(var colIndex = 0; colIndex < this.state.columns.length-1 ; colIndex ++) {
+				console.log(this.state.columns[colIndex])
+				record_to_download[this.state.columns[colIndex].Header] = currentRecords[index][this.state.columns[colIndex].accessor]
+			}
+			data_to_download.push(record_to_download)
+
+		}
+		this.setState({ dataToDownload: data_to_download }, () => {
+			// click the CSVLink component to trigger the CSV download
+			this.csvLink.link.click()
+		})
 	}
 
 	componentWillMount () {
@@ -47,6 +72,64 @@ class StudentList extends Component {
 			.catch(function (error) {
 				console.log(error);
 			});
+
+		let columns= [{
+			Header: 'First Name',
+			accessor: 'first_name'
+		},{
+			Header: 'Last Name',
+			accessor: 'last_name'
+		},
+			{
+				Header: 'Dob',
+				accessor: 'dob'
+			},
+			{
+				Header: 'Age',
+				accessor: 'age'
+			},
+			{
+				Header: 'Gender',
+				accessor: 'gender'
+			},
+			{
+				Header: 'Ethnic Group',
+				accessor: 'ethnic_group'
+			},
+			{
+				Header: 'First Language',
+				accessor: 'first_language'
+			},
+			{
+				Header: 'Country of Origin',
+				accessor: 'country_of_origin'
+			},
+			{
+				Header: 'Employment Status',
+				accessor: 'employment_status'
+			},
+			{
+				Header: 'Tests',
+				accessor: 'tests',
+				style:{ 'white-space': 'unset'}
+			},
+			{
+				Header: 'Status',
+				accessor: 'status'
+			},
+			{
+				Header: '',
+				Cell: row => (
+					<div>
+						<span style={iconStyle}><i className="fa fa-pencil-square-o" aria-hidden="true" onClick={() => this.handleEdit(row.original)}></i></span>
+						<span><i className="fa fa-times" aria-hidden="true" onClick={() => handleDelete(row.original)}></i></span>
+					</div>
+				)
+			}]
+
+		this.setState({
+			columns: columns
+		})
 	};
 
 	notify = (message) => {
@@ -156,20 +239,26 @@ class StudentList extends Component {
 			<div>
 
 				<Row style={{backgroundColor: '#f1f1f1', textAlign:'Right', paddingRight: '10px'}}>
-					<Col ><Button size="sm" color="primary" onClick={this.newStudent}>New Student</Button>{' '}</Col>
+					<Col ><Button size="sm" color="primary" onClick={this.newStudent}>New Student</Button>{' '} <Button size="sm" color="primary" onClick={this.download}>Export</Button>{' '}</Col>
 				</Row>
 
-		<Row>
-			<Col>
-				<ReactTable
-					noDataText="Oh Noes! No Data"
-					data={this.state.data}
-					columns={columns}
-					defaultPageSize = {-1}
-					showPagination={false}
-				/>
-			</Col>
-		</Row>
+				<div>
+					<CSVLink
+						data={this.state.dataToDownload}
+						filename="students.csv"
+						className="hidden"
+						ref={(r) => this.csvLink = r}
+						target="_blank"/>
+
+				</div>
+
+				<div>
+					<ReactTable ref={(r) => this.reactTable = r}
+									data={this.state.data} columns={columns}
+									defaultPageSize = {-1}
+									showPagination={false}
+					/>
+				</div>
 
 		<div>
 
